@@ -1,0 +1,19 @@
+{
+  "name": "EmventsInc",
+  "version": "1.0.0",
+  "description": "Emvents Inc. REST API",
+  "main": "helloWorld.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ccalvarez/EmventsInc.git"
+  },
+  "author": "Carolina Cordero <ccalvarez@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ccalvarez/EmventsInc/issues"
+  },
+  "homepage": "https://github.com/ccalvarez/EmventsInc"
+}
