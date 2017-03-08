@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/ccalvarez/EmventsInc/issues"
   },
-  "homepage": "https://github.com/ccalvarez/EmventsInc"
+  "homepage": "https://github.com/ccalvarez/EmventsInc",
+  "dependencies": {
+    "express": "4.15.2"
+  }
 }
