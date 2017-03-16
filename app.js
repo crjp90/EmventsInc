@@ -1,6 +1,15 @@
 const express = require('express')
+const app = express();
+const eventsArray = new Array();
 
-const app = express()
+class Event { 
+	constructor(id, title, description, date) { 
+		this.id = id;
+		this.title=title;
+		this.description=description;
+		this.date=date;
+	} 
+}
 
 app.get('/', (req, res) => {
   res.send('Got a GET request!')
