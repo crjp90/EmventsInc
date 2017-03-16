@@ -25,6 +25,10 @@ app.post('/', (req, res) => {
   res.send('Got a POST request')
 })
 
+app.get('/events', (req, res) => {
+  res.json(eventsArray);
+})
+
 app.listen(3000, () => {
   console.log('Example app listening on port 3000!')
 })
