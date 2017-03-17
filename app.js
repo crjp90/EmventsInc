@@ -2,13 +2,13 @@ const express = require('express')
 const app = express();
 const eventsArray = new Array();
 
-class Event { 
-	constructor(id, title, description, date) { 
+class Event {
+	constructor(id, title, description, date) {
 		this.id = id;
 		this.title=title;
 		this.description=description;
 		this.date=date;
-	} 
+	}
 }
 
 eventsArray.push(new Event(1, 'Conferencia', 'Node.js, Pair Programming', '2017-03-15'));
