@@ -60,6 +60,25 @@ app.post('/events', (req,res) => {
 	}
 })
 
+app.put('/events/:id', (req,res) => {
+	try{
+		let indice = eventsArray.findIndex(evento => evento.id == req.params.id);
+
+		if (indice == -1)
+		{
+			res.status(404).send('No se puede actualizar un evento que no existe')
+		}
+		else
+		{
+			let eventoActualizado = new Event(req.params.id, req.body.title, req.body.description, req.body.date);
+			eventsArray[indice] = eventoActualizado;
+			res.status(200).json(eventoActualizado);
+		}
+	}catch(ex){
+		res.status(500).send('Se encontró un error.')
+	}
+})
+
 app.listen(3000, () => {
   console.log('Example app listening on port 3000!')
 })
