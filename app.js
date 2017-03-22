@@ -86,6 +86,22 @@ app.put('/events/:id', (req,res) => {
 	}
 })
 
+app.delete('/events/:id', (req, res) => {
+	try{
+		let indice = eventsArray.findIndex(evento => evento.id == req.params.id);
+		if (indice == -1)
+		{
+			res.status(404).send('No se puede eliminar un evento que no existe');
+		}
+		else{
+			eventsArray.splice(indice,1);
+			res.status(200).json(req.params.id);
+		}
+	}catch(ex){
+		res.status(500).send('Se encontró un error.')
+	}
+})
+
 app.listen(3000, () => {
   console.log('Example app listening on port 3000!')
 })
