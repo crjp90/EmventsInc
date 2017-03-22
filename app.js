@@ -63,16 +63,23 @@ app.post('/events', (req,res) => {
 app.put('/events/:id', (req,res) => {
 	try{
 		let indice = eventsArray.findIndex(evento => evento.id == req.params.id);
-
 		if (indice == -1)
 		{
 			res.status(404).send('No se puede actualizar un evento que no existe')
 		}
 		else
 		{
-			let eventoActualizado = new Event(req.params.id, req.body.title, req.body.description, req.body.date);
-			eventsArray[indice] = eventoActualizado;
-			res.status(200).json(eventoActualizado);
+			if (req.body.title != undefined) {
+				eventsArray[indice].title = req.body.title;
+			}
+			if (req.body.description != undefined) {
+				eventsArray[indice].description = req.body.description;
+			}
+			if (req.body.date != undefined) {
+				eventsArray[indice].date = req.body.date;
+			}
+
+			res.status(200).json(eventsArray[indice]);
 		}
 	}catch(ex){
 		res.status(500).send('Se encontró un error.')
