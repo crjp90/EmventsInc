@@ -55,7 +55,51 @@ const eventsArray = new Array();
 		});
 	}
 
-//const eventManager = new EventManager();
+	function updateEvent(id,title,description,date){
+		return new Promise( function (resolve, reject) {
+			try{
+				let indice = eventsArray.findIndex(evento => evento.id == id);
+				if (indice == -1)
+				{
+					resolve(-1)
+				}
+				else
+				{
+					if (title != undefined) {
+						eventsArray[indice].title = title;
+					}
+					if (description != undefined) {
+						eventsArray[indice].description = description;
+					}
+					if (date != undefined) {
+						eventsArray[indice].date = date;
+					}
+					resolve(eventsArray[indice]);
+			}
+		}
+		catch(ex){
+			reject(ex);
+		}
+	});
+}
+
+function deleteEvent(id){
+		return new Promise( function (resolve, reject) {
+			try{
+				let indice = eventsArray.findIndex(evento => evento.id == id);
+				if (indice == -1) {
+					resolve(-1);
+				}
+				else {
+					eventsArray.splice(indice,1);
+					resolve(id);
+				}
+			}
+			catch(ex){
+				reject(ex);
+			}
+		});
+	}
 
 app.use(bodyParser.json());
 
@@ -110,45 +154,36 @@ app.post('/events', (req,res) => {
 })
 
 app.put('/events/:id', (req,res) => {
-	try{
-		let indice = eventsArray.findIndex(evento => evento.id == req.params.id);
-		if (indice == -1)
-		{
-			res.status(404).send('No se puede actualizar un evento que no existe')
-		}
-		else
-		{
-			if (req.body.title != undefined) {
-				eventsArray[indice].title = req.body.title;
+	updateEvent(req.params.id, req.body.title, req.body.description, req.body.date)
+	.then(
+		event => {
+			if (event == -1) {
+				res.status(404).send('No se puede actualizar un evento que no existe')
 			}
-			if (req.body.description != undefined) {
-				eventsArray[indice].description = req.body.description;
+			else {
+				res.status(200).json(event);
 			}
-			if (req.body.date != undefined) {
-				eventsArray[indice].date = req.body.date;
-			}
-
-			res.status(200).json(eventsArray[indice]);
-		}
-	}catch(ex){
-		res.status(500).send('Se encontró un error.')
-	}
+		})
+	.catch(
+		error => res.status(500).send('Se encontró un error ' + error)
+	)
 })
 
 app.delete('/events/:id', (req, res) => {
-	try{
-		let indice = eventsArray.findIndex(evento => evento.id == req.params.id);
-		if (indice == -1)
-		{
-			res.status(404).send('No se puede eliminar un evento que no existe');
-		}
-		else{
-			eventsArray.splice(indice,1);
-			res.status(200).json(req.params.id);
-		}
-	}catch(ex){
-		res.status(500).send('Se encontró un error.')
-	}
+	deleteEvent(req.params.id)
+	.then(
+		event => {
+			if (event == -1) {
+				res.status(404).send('No se puede eliminar un evento que no existe');
+			}
+			else
+			{
+				res.status(200).json(event);
+			}
+		})
+	.catch(
+		error => res.status(500).send('Se encontró un error ' + error)
+	)
 })
 
 app.listen(3000, () => {
