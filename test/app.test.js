@@ -73,3 +73,47 @@ describe('/POST event ', () => {
       });
   });
 });
+
+describe('/PUT event', () => {
+  it('it should PUT an existent event with all properties', (done) => {
+    const updatedEvent = {id: 2, title: "Webinar TDD con CHAI", description: "Prueba con CHAI", date : "2017-04-15"};
+    chai.request(app)
+      .put('/events/' + 2)
+      .send(updatedEvent)
+      .end((err,res) => {
+        res.should.have.status(200);
+        res.body.should.be.a('object');
+        res.body.should.have.property('title');
+        res.body.should.have.property('description');
+        res.body.should.have.property('date');
+        res.body.should.have.property('id').eql(2);
+        done();
+      });
+  });
+  it('it should PUT an existent event with optional properties', (done) => {
+    const updatedEvent = {id: 2, title: "Webinar TDD con CHAI"};
+    chai.request(app)
+      .put('/events/' + 2)
+      .send(updatedEvent)
+      .end((err,res) => {
+        res.should.have.status(200);
+        res.body.should.be.a('object');
+        res.body.should.have.property('title');
+        res.body.should.have.property('description');
+        res.body.should.have.property('date');
+        res.body.should.have.property('id').eql(2);
+        done();
+      });
+  });
+  it('it shouldn\'t PUT a non existent event', (done) => {
+    const updatedEvent = {id: 7, title: "Webinar TDD con CHAI", description: "Prueba con CHAI", date : "2017-04-15"};
+    chai.request(app)
+      .put('/events' + 7)
+      .send(updatedEvent)
+      .end((err, res) => {
+        res.should.have.status(404);
+        res.body.should.be.eql({});
+        done();
+      });
+  });
+});
