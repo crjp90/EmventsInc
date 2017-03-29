@@ -117,3 +117,24 @@ describe('/PUT event', () => {
       });
   });
 });
+
+describe('/DELETE event', () => {
+  it('it should DELETE an existent event', (done) => {
+    chai.request(app)
+      .delete('/events/' + 4)
+      .end((err, res) => {
+        res.should.have.status(200);
+        res.body.should.be.a('string');
+        done();
+      });
+  });
+  it('it shouldn\'t DELETE a non existent event', (done) => {
+    chai.request(app)
+      .delete('/events/' + 9)
+      .end((err, res) => {
+        res.should.have.status(404);
+        res.body.should.be.eql({});
+        done();
+      });
+  })
+});
