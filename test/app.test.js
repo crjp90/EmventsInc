@@ -18,3 +18,30 @@ describe('/GET all events', () => {
       });
   });
 });
+
+describe('/GET event by id', () => {
+  it('it should GET an event by its id', (done) => {
+    chai.request(app)
+      .get('/events/' + 3)
+      .end((err, res) => {
+        res.should.have.status(200);
+        res.body.should.be.a('object');
+        res.body.should.have.property('title');
+        res.body.should.have.property('description');
+        res.body.should.have.property('date');
+        res.body.should.have.property('id').eql(3);
+        done();
+      });
+  });
+
+  it('it should return status 404 if event doesn\'t exist', (done) => {
+    chai.request(app)
+      .get('/events/' + 6)
+      .end((err, res) => {
+        res.should.have.status(404);
+        res.body.should.be.eql({});
+        done();
+      });
+  });
+
+});
