@@ -3,6 +3,22 @@ const app = express();
 
 const Event = require('./Event').Event;
 const bodyParser = require('body-parser');
+
+const MongoClient = require('mongodb').MongoClient
+, assert = require('assert');
+
+const url = 'mongodb://localhost:27017/events';
+
+let eventsdb;
+
+MongoClient.connect(url, (err, db) => {
+	assert.equal(null, err);
+	console.log('Connected successfully to server');
+	eventsdb = db;
+	db.close();
+});
+
+
 const eventsArray = new Array();
 /*class EventManager {
 	constructor() {*/
@@ -41,9 +57,28 @@ const eventsArray = new Array();
 		return new Promise( function (resolve, reject) {
 			try{
 				let idEncontrado = eventsArray.find(evento => evento.id == id);
+
 				if(idEncontrado == undefined){
+
 					let newEvent = new Event(id, title, description, date);
-					eventsArray.push(newEvent);
+
+					let insertEvent = (db, callback) => {
+						let collection = db.collection('events');
+						collection.insertOne(newEvent, (err, result) => {
+							assert.equal(err, null);
+							assert.equal(1, result.result.n);
+							assert.equal(1, result.ops.length);
+							console.log('Inserted 1 event into the collection');
+							callback(result);
+						});
+					};
+
+					insertEvent(eventsdb, () => {
+						db.close();
+					});
+
+					//eventsArray.push(newEvent);
+
 					resolve(newEvent);
 				}else{
 					resolve(undefined);
