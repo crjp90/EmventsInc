@@ -15,7 +15,6 @@ MongoClient.connect(url, (err, db) => {
 	assert.equal(null, err);
 	console.log('Connected successfully to server');
 	eventsdb = db;
-	db.close();
 });
 
 
@@ -53,14 +52,14 @@ const eventsArray = new Array();
 		});
 	}
 
-	function createEvent(id,title,description,date){
+	function createEvent(_id,title,description,date){
 		return new Promise( function (resolve, reject) {
 			try{
-				let idEncontrado = eventsArray.find(evento => evento.id == id);
+				let idEncontrado = eventsArray.find(evento => evento._id == _id);
 
 				if(idEncontrado == undefined){
 
-					let newEvent = new Event(id, title, description, date);
+					let newEvent = new Event(_id, title, description, date);
 
 					let insertEvent = (db, callback) => {
 						let collection = db.collection('events');
@@ -74,12 +73,12 @@ const eventsArray = new Array();
 					};
 
 					insertEvent(eventsdb, () => {
-						db.close();
+						resolve(newEvent);
 					});
 
 					//eventsArray.push(newEvent);
 
-					resolve(newEvent);
+
 				}else{
 					resolve(undefined);
 				}
