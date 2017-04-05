@@ -19,15 +19,11 @@ MongoClient.connect(url, (err, db) => {
 
 
 const eventsArray = new Array();
-/*class EventManager {
-	constructor() {*/
-
 		eventsArray.push(new Event(1, 'Conferencia', 'Node.js, Pair Programming', '2017-03-15'));
 		eventsArray.push(new Event(2, 'Concierto', 'Sinfonica', '2017-03-11'));
 		eventsArray.push(new Event(3, 'Cita Dentista', 'Limpieza Dental', '2017-03-09'));
 		eventsArray.push(new Event(4, 'Clases de frances', 'Iniciando', '2017-03-01'));
 		eventsArray.push(new Event(5, 'Cena', 'Conunidad Agile', '2017-02-15'));
-	/*}*/
 
 	function getAll(){
 		return new Promise( function (resolve, reject) {
@@ -64,21 +60,21 @@ const eventsArray = new Array();
 					let insertEvent = (db, callback) => {
 						let collection = db.collection('events');
 						collection.insertOne(newEvent, (err, result) => {
-							assert.equal(err, null);
-							assert.equal(1, result.result.n);
-							assert.equal(1, result.ops.length);
-							console.log('Inserted 1 event into the collection');
-							callback(result);
+							if (err) {
+								reject(err);
+							}
+							else {
+								assert.equal(1, result.result.n);
+								assert.equal(1, result.ops.length);
+								console.log('Inserted 1 event into the collection');
+								callback(result);
+							}
 						});
 					};
 
 					insertEvent(eventsdb, () => {
 						resolve(newEvent);
 					});
-
-					//eventsArray.push(newEvent);
-
-
 				}else{
 					resolve(undefined);
 				}
