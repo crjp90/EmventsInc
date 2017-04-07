@@ -85,30 +85,48 @@ const eventsArray = new Array();
 		});
 	}
 
-	function updateEvent(id,title,description,date){
-		return new Promise( function (resolve, reject) {
-			try{
-				let indice = eventsArray.findIndex(evento => evento.id == id);
-				if (indice == -1)
-				{
-					resolve(-1)
+function updateEvent(_id, title, description, date) {
+	return new Promise( (resolve, reject) => {
+		try {
+			const collection = eventsdb.collection('events');
+
+			collection.findOne({ _id: Number(_id)}, (err, doc) => {
+
+				if (doc) {
+					let foundEvent = doc;
+
+					if (title != undefined) {
+						foundEvent.title = title;
+					}
+					if (description != undefined) {
+						foundEvent.description = description;
+					}
+					if (date != undefined) {
+						foundEvent.date = date;
+					}
+
+					// Update in MongoDB:
+					collection.update( { _id: foundEvent._id }, foundEvent, (err, result) => {
+						if (err) {
+							reject(err);
+						}
+						else {
+							assert.equal(1, result.result.n);
+							console.log("Updated the event with the field _id equal to " + _id);
+
+							// Resolve the promise:
+							resolve(foundEvent);
+						}
+					});
 				}
 				else
 				{
-					if (title != undefined) {
-						eventsArray[indice].title = title;
-					}
-					if (description != undefined) {
-						eventsArray[indice].description = description;
-					}
-					if (date != undefined) {
-						eventsArray[indice].date = date;
-					}
-					resolve(eventsArray[indice]);
-			}
+					resolve(-1);
+				}
+			});
 		}
-		catch(ex){
-			reject(ex);
+	 	catch(ex) {
+		 	reject(ex);
 		}
 	});
 }
