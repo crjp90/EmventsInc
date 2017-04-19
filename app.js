@@ -39,7 +39,7 @@ const eventsArray = new Array();
 	function getEventById(id){
 		return new Promise( function (resolve, reject) {
 			try{
-				let eventoEncontrado = eventsArray.find(evento => evento.id == id);
+				const eventoEncontrado = eventsArray.find(evento => evento.id == id);
 				resolve(eventoEncontrado);
 			}
 			catch(ex){
@@ -51,33 +51,37 @@ const eventsArray = new Array();
 	function createEvent(_id,title,description,date){
 		return new Promise( function (resolve, reject) {
 			try{
-				let idEncontrado = eventsArray.find(evento => evento._id == _id);
+				const collection = eventsdb.collection('events');
 
-				if(idEncontrado == undefined){
+				collection.findOne({_id: _id}, (err, doc) => {
+					if(err){
+						reject(err);
+					}else{
+						if(!doc){
+							const newEvent = new Event(_id, title, description, date);
 
-					let newEvent = new Event(_id, title, description, date);
+							const insertEvent = (db, callback) => {
+								collection.insertOne(newEvent, (err, result) => {
+									if (err) {
+										reject(err);
+									}
+									else {
+										assert.equal(1, result.result.n);
+										assert.equal(1, result.ops.length);
+										console.log('Inserted 1 event into the collection');
+										callback(result);
+									}
+								});
+							};
 
-					let insertEvent = (db, callback) => {
-						let collection = db.collection('events');
-						collection.insertOne(newEvent, (err, result) => {
-							if (err) {
-								reject(err);
-							}
-							else {
-								assert.equal(1, result.result.n);
-								assert.equal(1, result.ops.length);
-								console.log('Inserted 1 event into the collection');
-								callback(result);
-							}
-						});
-					};
-
-					insertEvent(eventsdb, () => {
-						resolve(newEvent);
-					});
-				}else{
-					resolve(undefined);
-				}
+							insertEvent(eventsdb, () => {
+								resolve(newEvent);
+							});
+						}else{
+							resolve(undefined);
+						}
+					}
+				});
 			}
 			catch(ex){
 				reject(ex);
@@ -113,8 +117,6 @@ function updateEvent(_id, title, description, date) {
 						else {
 							assert.equal(1, result.result.n);
 							console.log("Updated the event with the field _id equal to " + _id);
-
-							// Resolve the promise:
 							resolve(foundEvent);
 						}
 					});
@@ -131,23 +133,30 @@ function updateEvent(_id, title, description, date) {
 	});
 }
 
-function deleteEvent(id){
+function deleteEvent(_id){
 		return new Promise( function (resolve, reject) {
 			try{
-				let indice = eventsArray.findIndex(evento => evento.id == id);
-				if (indice == -1) {
+				const collection = eventsdb.collection('events');
+				collection.findOne({ _id: Number(_id)}, (err, doc) => {
+				if (doc) {
+					collection.deleteOne({ _id: Number(_id)}, (err, result) => {
+						if(err){
+							reject(err);
+						}else{
+							assert.equal(1, result.result.n);
+							console.log("Deleted the event with the field _id equal to " + _id);
+							resolve(_id);
+						}
+					});
+				}else{
 					resolve(-1);
 				}
-				else {
-					eventsArray.splice(indice,1);
-					resolve(id);
-				}
-			}
-			catch(ex){
-				reject(ex);
-			}
-		});
-	}
+			});
+		}catch(ex){
+			reject(ex);
+		}
+	});
+}
 
 app.use(bodyParser.json());
 
@@ -170,7 +179,7 @@ app.get('/events', (req, res) => {
 })
 
 app.get('/events/:id', (req, res) => {
-	let idBuscado = req.params.id;
+	const idBuscado = req.params.id;
 	getEventById(idBuscado)
 	.then(
 		event => {
