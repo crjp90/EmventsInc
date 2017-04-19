@@ -1,12 +1,10 @@
 const express = require('express')
-const app = express();
-
 const Event = require('./Event').Event;
 const bodyParser = require('body-parser');
-
 const MongoClient = require('mongodb').MongoClient
 , assert = require('assert');
 
+const app = express();
 const url = 'mongodb://localhost:27017/events';
 
 let eventsdb;
@@ -17,69 +15,17 @@ MongoClient.connect(url, (err, db) => {
 	eventsdb = db;
 });
 
-
-const eventsArray = new Array();
-		eventsArray.push(new Event(1, 'Conferencia', 'Node.js, Pair Programming', '2017-03-15'));
-		eventsArray.push(new Event(2, 'Concierto', 'Sinfonica', '2017-03-11'));
-		eventsArray.push(new Event(3, 'Cita Dentista', 'Limpieza Dental', '2017-03-09'));
-		eventsArray.push(new Event(4, 'Clases de frances', 'Iniciando', '2017-03-01'));
-		eventsArray.push(new Event(5, 'Cena', 'Conunidad Agile', '2017-02-15'));
-
-	function getAll(){
-		return new Promise( function (resolve, reject) {
-			try{
-				resolve(eventsArray);
-			}
-			catch(ex){
-				reject(ex);
-			}
-		});
-	};
-
-	function getEventById(id){
-		return new Promise( function (resolve, reject) {
-			try{
-				const eventoEncontrado = eventsArray.find(evento => evento.id == id);
-				resolve(eventoEncontrado);
-			}
-			catch(ex){
-				reject(ex);
-			}
-		});
-	}
-
-	function createEvent(_id,title,description,date){
+function getAll(){
 		return new Promise( function (resolve, reject) {
 			try{
 				const collection = eventsdb.collection('events');
-
-				collection.findOne({_id: _id}, (err, doc) => {
-					if(err){
+				collection.find({}).toArray((err, docs) => {
+					if (err) {
 						reject(err);
-					}else{
-						if(!doc){
-							const newEvent = new Event(_id, title, description, date);
-
-							const insertEvent = (db, callback) => {
-								collection.insertOne(newEvent, (err, result) => {
-									if (err) {
-										reject(err);
-									}
-									else {
-										assert.equal(1, result.result.n);
-										assert.equal(1, result.ops.length);
-										console.log('Inserted 1 event into the collection');
-										callback(result);
-									}
-								});
-							};
-
-							insertEvent(eventsdb, () => {
-								resolve(newEvent);
-							});
-						}else{
-							resolve(undefined);
-						}
+					}
+					else
+					{
+						resolve(docs);
 					}
 				});
 			}
@@ -87,7 +33,67 @@ const eventsArray = new Array();
 				reject(ex);
 			}
 		});
-	}
+	};
+function getEventById(_id){
+	return new Promise( function (resolve, reject) {
+		try{
+			const collection = eventsdb.collection('events');
+			collection.findOne({_id: Number(_id)}, (err, doc) => {
+				if (err) {
+					reject(err);
+				}
+				else
+				{
+					resolve(doc);
+				}
+			});
+		}
+		catch(ex){
+			reject(ex);
+		}
+	});
+}
+
+function createEvent(_id,title,description,date){
+	return new Promise( function (resolve, reject) {
+		try{
+			const collection = eventsdb.collection('events');
+
+			collection.findOne({_id: _id}, (err, doc) => {
+				if(err){
+					reject(err);
+				}else{
+					if(!doc){
+						const newEvent = new Event(_id, title, description, date);
+
+						const insertEvent = (db, callback) => {
+							collection.insertOne(newEvent, (err, result) => {
+								if (err) {
+									reject(err);
+								}
+								else {
+									assert.equal(1, result.result.n);
+									assert.equal(1, result.ops.length);
+									console.log('Inserted 1 event into the collection');
+									callback(result);
+								}
+							});
+						};
+
+						insertEvent(eventsdb, () => {
+							resolve(newEvent);
+						});
+					}else{
+						resolve(undefined);
+					}
+				}
+			});
+		}
+		catch(ex){
+			reject(ex);
+		}
+	});
+}
 
 function updateEvent(_id, title, description, date) {
 	return new Promise( (resolve, reject) => {
@@ -159,15 +165,6 @@ function deleteEvent(_id){
 }
 
 app.use(bodyParser.json());
-
-app.get('/', (req, res) => {
-  res.send('Got a GET request!')
-})
-
-app.post('/', (req, res) => {
-  res.send('Got a POST request')
-})
-
 
 app.get('/events', (req, res) => {
 	getAll()
