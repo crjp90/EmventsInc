@@ -1,33 +1,17 @@
 const express = require('express')
 const Event = require('./Event').Event;
 const bodyParser = require('body-parser');
-const MongoClient = require('mongodb').MongoClient
-, assert = require('assert');
-
 const EventModel = require('./EventModel');
-
 const app = express();
-const url = 'mongodb://localhost:27017/events';
-
-let eventsdb;
-
-MongoClient.connect(url, (err, db) => {
-	assert.equal(null, err);
-	console.log('Connected successfully to server');
-	eventsdb = db;
-});
 
 function getAll(){
 		return new Promise( function (resolve, reject) {
 			try{
-				const collection = eventsdb.collection('events');
-				collection.find({}).toArray((err, docs) => {
-					if (err) {
+				EventModel.find({},(err,events) => {
+					if(err){
 						reject(err);
-					}
-					else
-					{
-						resolve(docs);
+					}else{
+						resolve(events);
 					}
 				});
 			}
@@ -36,17 +20,16 @@ function getAll(){
 			}
 		});
 	};
+
 function getEventById(_id){
 	return new Promise( function (resolve, reject) {
 		try{
-			const collection = eventsdb.collection('events');
-			collection.findOne({_id: Number(_id)}, (err, doc) => {
-				if (err) {
+			EventModel.findById(Number(_id), (err,event) => {
+				if(err){
 					reject(err);
 				}
-				else
-				{
-					resolve(doc);
+				else{
+					resolve(event);
 				}
 			});
 		}
@@ -57,16 +40,10 @@ function getEventById(_id){
 }
 
 function createEvent(_id,title,description,date){
-	console.log('entre a createEvent');
-	console.log(_id);
-
 	return new Promise( function (resolve, reject) {
 		try{
 			EventModel.findById(Number(_id), (err, event) => {
-				console.log(event);
-				console.log(!event);
 				if(err){
-					console.log(err);
 					reject(err);
 				}
 				else
@@ -81,7 +58,6 @@ function createEvent(_id,title,description,date){
 
             newEvent.save((err) => {
               if (err) {
-              	console.log(err);
                 reject(err);
               }
               else
@@ -93,14 +69,12 @@ function createEvent(_id,title,description,date){
           }
           else
           {
-          	console.log('ya existe');
             resolve(undefined);
           }
 				}
 			});
 		}
 		catch(ex){
-			console.log(ex);
 			reject(ex);
 		}
 	});
@@ -109,38 +83,34 @@ function createEvent(_id,title,description,date){
 function updateEvent(_id, title, description, date) {
 	return new Promise( (resolve, reject) => {
 		try {
-			const collection = eventsdb.collection('events');
-
-			collection.findOne({ _id: Number(_id)}, (err, doc) => {
-
-				if (doc) {
-					let foundEvent = doc;
-
-					if (title != undefined) {
-						foundEvent.title = title;
-					}
-					if (description != undefined) {
-						foundEvent.description = description;
-					}
-					if (date != undefined) {
-						foundEvent.date = date;
-					}
-
-					// Update in MongoDB:
-					collection.update( { _id: foundEvent._id }, foundEvent, (err, result) => {
-						if (err) {
-							reject(err);
-						}
-						else {
-							assert.equal(1, result.result.n);
-							console.log("Updated the event with the field _id equal to " + _id);
-							resolve(foundEvent);
-						}
-					});
+			EventModel.findById(Number(_id), (err, event) => {
+				if(err){
+					reject(err);
 				}
-				else
-				{
-					resolve(-1);
+				else{
+					if (event) {
+						if (title != undefined) {
+							event.title = title;
+						}
+						if (description != undefined) {
+							event.description = description;
+						}
+						if (date != undefined) {
+							event.date = date;
+						}
+						event.save((err) =>{
+							if(err){
+								reject(err);
+							}
+							else{
+								console.log("Updated the event with the field _id equal to " + _id);
+								resolve(event);
+							}
+						});
+					}
+					else{
+						resolve(-1);
+					}
 				}
 			});
 		}
@@ -153,21 +123,26 @@ function updateEvent(_id, title, description, date) {
 function deleteEvent(_id){
 		return new Promise( function (resolve, reject) {
 			try{
-				const collection = eventsdb.collection('events');
-				collection.findOne({ _id: Number(_id)}, (err, doc) => {
-				if (doc) {
-					collection.deleteOne({ _id: Number(_id)}, (err, result) => {
-						if(err){
-							reject(err);
-						}else{
-							assert.equal(1, result.result.n);
-							console.log("Deleted the event with the field _id equal to " + _id);
-							resolve(_id);
+				EventModel.findById(Number(_id), (err, event) => {
+					if(err){
+						reject(err);
+					}
+					else{
+						if(event){
+							event.remove((err) => {
+								if(err){
+									reject(err);
+								}
+								else{
+									console.log("Deleted the event with the field _id equal to " + _id);
+									resolve(_id);
+								}
+							});
 						}
-					});
-				}else{
-					resolve(-1);
-				}
+						else{
+							resolve(-1);
+						}
+					}
 			});
 		}catch(ex){
 			reject(ex);
