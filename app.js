@@ -4,6 +4,8 @@ const bodyParser = require('body-parser');
 const MongoClient = require('mongodb').MongoClient
 , assert = require('assert');
 
+const EventModel = require('./EventModel');
+
 const app = express();
 const url = 'mongodb://localhost:27017/events';
 
@@ -55,41 +57,50 @@ function getEventById(_id){
 }
 
 function createEvent(_id,title,description,date){
+	console.log('entre a createEvent');
+	console.log(_id);
+
 	return new Promise( function (resolve, reject) {
 		try{
-			const collection = eventsdb.collection('events');
-
-			collection.findOne({_id: _id}, (err, doc) => {
+			EventModel.findById(Number(_id), (err, event) => {
+				console.log(event);
+				console.log(!event);
 				if(err){
+					console.log(err);
 					reject(err);
-				}else{
-					if(!doc){
-						const newEvent = new Event(_id, title, description, date);
+				}
+				else
+				{
+					if (!event) {
+            const newEvent = EventModel({
+              _id : _id,
+              title: title,
+              description: description,
+              date:  new Date(date)
+            });
 
-						const insertEvent = (db, callback) => {
-							collection.insertOne(newEvent, (err, result) => {
-								if (err) {
-									reject(err);
-								}
-								else {
-									assert.equal(1, result.result.n);
-									assert.equal(1, result.ops.length);
-									console.log('Inserted 1 event into the collection');
-									callback(result);
-								}
-							});
-						};
-
-						insertEvent(eventsdb, () => {
-							resolve(newEvent);
-						});
-					}else{
-						resolve(undefined);
-					}
+            newEvent.save((err) => {
+              if (err) {
+              	console.log(err);
+                reject(err);
+              }
+              else
+              {
+                console.log('Inserted 1 event into the collection');
+                resolve(newEvent);
+              }
+            });
+          }
+          else
+          {
+          	console.log('ya existe');
+            resolve(undefined);
+          }
 				}
 			});
 		}
 		catch(ex){
+			console.log(ex);
 			reject(ex);
 		}
 	});
