@@ -2,7 +2,7 @@
   "name": "EmventsInc",
   "version": "1.0.0",
   "description": "Emvents Inc. REST API",
-  "main": "helloWorld.js",
+  "main": "app.js",
   "scripts": {
     "test": "mocha"
   },
