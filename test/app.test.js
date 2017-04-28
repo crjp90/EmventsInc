@@ -28,17 +28,20 @@ describe('Delete events DB', () => {
 
   describe('/GET event by id', () => {
     it('it should GET an event by its id', (done) => {
-      chai.request(app)
-        .get('/events/' + 3)
+      const newEvent = new eventModel({_id: 1, title: "Feria de Libros", description: "Conferencias y venta", date : "2017-06-15"});
+      newEvent.save((err, newEvent) => {
+        chai.request(app)
+        .get('/events/' + newEvent._id)
         .end((err, res) => {
           res.should.have.status(200);
           res.body.should.be.a('object');
           res.body.should.have.property('title');
           res.body.should.have.property('description');
           res.body.should.have.property('date');
-          res.body.should.have.property('_id').eql(3);
+          res.body.should.have.property('_id').eql(newEvent._id);
           done();
         });
+      });
     });
 
     it('it should return status 404 if event doesn\'t exist', (done) => {
@@ -68,9 +71,12 @@ describe('Delete events DB', () => {
           done();
         })
     });
+
     it('it shouldn\'t POST an existent event', (done) => {
-      const newEvent = {id: 2, title: "Webinar TDD con CHAI", description: "Prueba con CHAI", date : "2017-04-15"};
-      chai.request(app)
+      const event = new eventModel({_id: 7, title: "Feria de Libros", description: "Conferencias y venta", date : "2017-06-15"});
+      event.save((err, event) => {
+        const newEvent = {id: 7, title: "Feria de Libros", description: "Conferencias y venta", date : "2017-06-15"};
+        chai.request(app)
         .post('/events')
         .send(newEvent)
         .end((err,res) => {
@@ -78,40 +84,49 @@ describe('Delete events DB', () => {
           res.body.should.be.eql({});
           done();
         });
+      });
     });
   });
 
   describe('/PUT event', () => {
     it('it should PUT an existent event with all properties', (done) => {
-      const updatedEvent = {id: 2, title: "Webinar TDD con CHAI", description: "Prueba con CHAI", date : "2017-04-15"};
-      chai.request(app)
-        .put('/events/' + 2)
-        .send(updatedEvent)
-        .end((err,res) => {
-          res.should.have.status(200);
-          res.body.should.be.a('object');
-          res.body.should.have.property('title');
-          res.body.should.have.property('description');
-          res.body.should.have.property('date');
-          res.body.should.have.property('_id').eql(2);
-          done();
-        });
+      const newEvent = new eventModel({_id: 2, title: "Webinar TDD con CHAI", description: "Prueba con CHAI", date : "2017-04-15"});
+      newEvent.save((err, event) => {
+        const updatedEvent = {id: event._id, title: "Pair Programming con CHAI", description: "Prueba con CHAI", date : "2017-04-15"};
+        chai.request(app)
+          .put('/events/' + event._id)
+          .send(updatedEvent)
+          .end((err,res) => {
+            res.should.have.status(200);
+            res.body.should.be.a('object');
+            res.body.should.have.property('title');
+            res.body.should.have.property('description');
+            res.body.should.have.property('date');
+            res.body.should.have.property('_id').eql(event._id);
+            done();
+          });
+      });
     });
+
     it('it should PUT an existent event with optional properties', (done) => {
-      const updatedEvent = {id: 2, title: "Webinar TDD con CHAI"};
-      chai.request(app)
-        .put('/events/' + 2)
-        .send(updatedEvent)
-        .end((err,res) => {
-          res.should.have.status(200);
-          res.body.should.be.a('object');
-          res.body.should.have.property('title');
-          res.body.should.have.property('description');
-          res.body.should.have.property('date');
-          res.body.should.have.property('_id').eql(2);
-          done();
+      const newEvent = new eventModel({_id: 2, title: "Webinar TDD con CHAI", description: "Prueba con CHAI", date : "2017-04-15"});
+      newEvent.save((err,event) => {
+        const updatedEvent = {id: event._id, title: "Webinar TDD con CHAI"};
+        chai.request(app)
+          .put('/events/' + event._id)
+          .send(updatedEvent)
+          .end((err,res) => {
+            res.should.have.status(200);
+            res.body.should.be.a('object');
+            res.body.should.have.property('title');
+            res.body.should.have.property('description');
+            res.body.should.have.property('date');
+            res.body.should.have.property('_id').eql(event._id);
+            done();
+          });
         });
     });
+
     it('it shouldn\'t PUT a non existent event', (done) => {
       const updatedEvent = {id: 7, title: "Webinar TDD con CHAI", description: "Prueba con CHAI", date : "2017-04-15"};
       chai.request(app)
@@ -127,14 +142,18 @@ describe('Delete events DB', () => {
 
   describe('/DELETE event', () => {
     it('it should DELETE an existent event', (done) => {
-      chai.request(app)
-        .delete('/events/' + 4)
+      const newEvent = new eventModel({_id: 2, title: "Webinar TDD con CHAI", description: "Prueba con CHAI", date : "2017-04-15"});
+      newEvent.save((err,event) => {
+        chai.request(app)
+        .delete('/events/' + event._id)
         .end((err, res) => {
           res.should.have.status(200);
           res.body.should.be.a('string');
           done();
         });
+      });
     });
+
     it('it shouldn\'t DELETE a non existent event', (done) => {
       chai.request(app)
         .delete('/events/' + 9)
