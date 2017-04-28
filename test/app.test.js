@@ -164,5 +164,25 @@ describe('Delete events DB', () => {
         });
     })
   });
+
+  describe('/GET events by Title', () => {
+    it('it should get all events containing a given title', (done) => {
+      const newEvent1= new eventModel({_id: 1, title: "Feria de Libros", description: "Conferencias y venta", date : "2017-06-15"});
+      const newEvent2= new eventModel({_id: 2, title: "Feria Gastronomica", description: "Gallo Pinto y Pupusas", date : "2017-06-15"});
+      newEvent1.save((err, newEvent1) => {
+          newEvent2.save((err,newEvent2) => {
+          chai.request(app)
+          .get('/events/title/' + "feria")
+          .end((err, res) => {
+            res.should.have.status(200);
+            res.body.should.be.a('array');
+            res.body.length.should.be.eql(2);
+            done();
+          });
+        });
+      });
+    });
+  });
 });
+
 

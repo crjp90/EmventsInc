@@ -28,6 +28,16 @@ router.get('/:id', (req, res) => {
   )
 })
 
+router.get('/title/:title', (req,res) => {
+  const titleBuscado = req.params.title;
+  eventManager.getEventsByTitle(titleBuscado)
+  .then(
+    events => res.json(events)
+  ).catch(
+    error => res.status(500).send('Se encontró un error ' + error)
+  )
+});
+
 router.post('/', (req,res) => {
   eventManager.createEvent(req.body.id, req.body.title, req.body.description, req.body.date)
   .then(

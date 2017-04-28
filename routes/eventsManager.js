@@ -35,6 +35,24 @@ function getEventById(_id){
   });
 }
 
+function getEventsByTitle(title){
+  return new Promise( function (resolve,reject){
+    try{
+      EventModel.find( { "title": { "$regex": title, "$options": "i" } }, (err,events) =>{
+        if(err){
+          reject(err);
+        }
+        else{
+          resolve(events);
+        }
+      });
+    }
+    catch(ex){
+      reject(ex);
+    }
+  });
+}
+
 function createEvent(_id,title,description,date){
   return new Promise( function (resolve, reject) {
     try{
@@ -146,4 +164,4 @@ function deleteEvent(_id){
   });
 }
 
-module.exports = {getAll, getEventById, createEvent, updateEvent, deleteEvent};
+module.exports = {getAll, getEventById, getEventsByTitle, createEvent, updateEvent, deleteEvent};
