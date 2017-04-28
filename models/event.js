@@ -20,8 +20,8 @@ mongoose.connection.on('disconnected', () => {
 const Schema = mongoose.Schema;
 const eventSchema = new Schema(
   {
-    _id: { type: Number, required: true, unique: true },
-    title: { type: String, required: true },
+    _id: { type: Number, required: true },
+    title: { type: String, required: true, index: true},
     description: { type: String, required: true },
     date: { type: Date }
   },
@@ -29,6 +29,18 @@ const eventSchema = new Schema(
     versionKey: false
   }
 );
+
 Event = mongoose.model('Event', eventSchema);
+
+Event.ensureIndexes((err) => {
+  if (err) {
+    console.log(err);
+  }
+  else
+  {
+    console.log('Ensure Indexes executed');
+  }
+});
+
 
 module.exports = Event;
