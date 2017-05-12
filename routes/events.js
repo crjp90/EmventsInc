@@ -1,16 +1,46 @@
 const express = require('express');
+const passport = require('passport')
+const BasicStrategy = require('passport-http').BasicStrategy;
 const router = express.Router();
 const eventManager = require('./eventsManager');
+const User = require('../models/user.js');
 
-router.get('/', (req, res) => {
+passport.use(new BasicStrategy(
+  (username, password, done) => {
+    User.findOne({ username: username }, (err, user) => {
+      console.log(user.speak);
+      if (err) { return done(err); }
+      if (!user) { return done(null, false); }
+      if (!user.verifyPassword(password)) { return done(null, false); }
+      return done(null, user);
+    });
+  }
+));
+
+router.get('/',
+  passport.authenticate('basic', (err, user, info) =>
+  {
+    (req, res) => {
+      eventManager.getAll()
+      .then(
+        events => res.json(events)
+      ).catch(
+        error => res.status(500).send('Se encontro un error ' + error)
+      )
+    };
+  }
+));
+
+/*
+ (req, res) => {
   eventManager.getAll()
   .then(
     events => res.json(events)
   ).catch(
     error => res.status(500).send('Se encontro un error ' + error)
   )
-})
-
+}
+*/
 router.get('/:id', (req, res) => {
   const idBuscado = req.params.id;
   eventManager.getEventById(idBuscado)

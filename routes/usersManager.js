@@ -3,11 +3,9 @@ const UserModel = require('../models/user');
 function createUser(username,password,email, fullname){
   return new Promise((resolve,reject) => {
     try{
-      console.log(username);
       UserModel.findOne({username:username}, (err,user) => {
         if(err){ reject(err) }
         else{
-          console.log(user);
           if(!user){
             const newUser = UserModel({username:username,password:password,email:email,fullname:fullname});
             newUser.save((err) => {
