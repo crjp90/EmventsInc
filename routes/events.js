@@ -22,7 +22,7 @@ passport.use(new BasicStrategy(
 
 router.get('/',
   //passport.authenticate('basic', function(req, res){
-    passport.authenticate('basic', (req, res) => {
+    passport.authenticate('basic', { session: false}), (req, res) => {
       eventManager.getAll()
       .then(
         events => res.json(events)
@@ -30,8 +30,8 @@ router.get('/',
         error => res.status(500).send('Se encontro un error ' + error)
       )
     //};
-  })
-);
+  });
+//);
 //);
 
 /*
