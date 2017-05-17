@@ -8,28 +8,31 @@ const User = require('../models/user.js');
 passport.use(new BasicStrategy(
   (username, password, done) => {
     User.findOne({ username: username }, (err, user) => {
-      console.log(user.speak);
-      if (err) { return done(err); }
-      if (!user) { return done(null, false); }
-      if (!user.verifyPassword(password)) { return done(null, false); }
+      if (err) {
+        return done(err); }
+      if (!user) {
+        return done(null, false); }
+      if (!user.verifyPassword(password)) {
+        return done(null, false);
+      }
       return done(null, user);
     });
   }
 ));
 
 router.get('/',
-  passport.authenticate('basic', (err, user, info) =>
-  {
-    (req, res) => {
+  //passport.authenticate('basic', function(req, res){
+    passport.authenticate('basic', (req, res) => {
       eventManager.getAll()
       .then(
         events => res.json(events)
       ).catch(
         error => res.status(500).send('Se encontro un error ' + error)
       )
-    };
-  }
-));
+    //};
+  })
+);
+//);
 
 /*
  (req, res) => {
