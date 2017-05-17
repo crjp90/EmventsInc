@@ -21,29 +21,15 @@ passport.use(new BasicStrategy(
 ));
 
 router.get('/',
-  //passport.authenticate('basic', function(req, res){
-    passport.authenticate('basic', { session: false}), (req, res) => {
-      eventManager.getAll()
-      .then(
-        events => res.json(events)
-      ).catch(
-        error => res.status(500).send('Se encontro un error ' + error)
-      )
-    //};
-  });
-//);
-//);
+  passport.authenticate('basic', { session: false }), (req, res) => {
+    eventManager.getAll()
+    .then(
+      events => res.json(events)
+    ).catch(
+      error => res.status(500).send('Se encontro un error ' + error)
+    )
+});
 
-/*
- (req, res) => {
-  eventManager.getAll()
-  .then(
-    events => res.json(events)
-  ).catch(
-    error => res.status(500).send('Se encontro un error ' + error)
-  )
-}
-*/
 router.get('/:id', (req, res) => {
   const idBuscado = req.params.id;
   eventManager.getEventById(idBuscado)
