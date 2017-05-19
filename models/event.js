@@ -24,9 +24,6 @@ const eventSchema = new Schema(
     title: { type: String, required: true, index: true},
     description: { type: String, required: true },
     date: { type: Date }
-  },
-  {
-    versionKey: false
   }
 );
 
