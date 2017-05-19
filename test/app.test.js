@@ -1,22 +1,28 @@
 const app = require('../app');
 const mongoose = require('mongoose');
 const eventModel = require('../models/event');
+const userModel = require('../models/user');
 const chai = require('chai');
 const chaiHttp = require('chai-http');
 const should = chai.should();
 
 chai.use(chaiHttp);
 
-describe('Delete events DB', () => {
+describe('Delete events and users collections, insert test user', () => {
  beforeEach(() => {
         eventModel.remove({}, (err) => {
         });
+        userModel.remove({}, (err) => {
+        });
+        const testUser = new userModel({ username: 'test', password: 'testPassword', email: 'testEmail', fullname: 'test user'});
+        testUser.save();
     });
 
   describe('/GET all events', () => {
     it('it should GET all the events', (done) => {
       chai.request(app)
         .get('/events')
+        .auth('test', 'testPassword')
         .end((err, res) => {
           res.should.have.status(200);
           res.body.should.be.a('array');
@@ -32,6 +38,7 @@ describe('Delete events DB', () => {
       newEvent.save((err, newEvent) => {
         chai.request(app)
         .get('/events/' + newEvent._id)
+        .auth('test', 'testPassword')
         .end((err, res) => {
           res.should.have.status(200);
           res.body.should.be.a('object');
@@ -47,6 +54,7 @@ describe('Delete events DB', () => {
     it('it should return status 404 if event doesn\'t exist', (done) => {
       chai.request(app)
         .get('/events/' + 6)
+        .auth('test', 'testPassword')
         .end((err, res) => {
           res.should.have.status(404);
           res.body.should.be.eql({});
@@ -60,6 +68,7 @@ describe('Delete events DB', () => {
       const newEvent = {id: 7, title: "Webinar TDD con CHAI", description: "Prueba con CHAI", date : "2017-04-15"};
       chai.request(app)
         .post('/events/')
+        .auth('test', 'testPassword')
         .send(newEvent)
         .end((err,res) => {
           res.should.have.status(201);
@@ -78,6 +87,7 @@ describe('Delete events DB', () => {
         const newEvent = {id: 7, title: "Feria de Libros", description: "Conferencias y venta", date : "2017-06-15"};
         chai.request(app)
         .post('/events')
+        .auth('test', 'testPassword')
         .send(newEvent)
         .end((err,res) => {
           res.should.have.status(409);
@@ -95,6 +105,7 @@ describe('Delete events DB', () => {
         const updatedEvent = {id: event._id, title: "Pair Programming con CHAI", description: "Prueba con CHAI", date : "2017-04-15"};
         chai.request(app)
           .put('/events/' + event._id)
+          .auth('test', 'testPassword')
           .send(updatedEvent)
           .end((err,res) => {
             res.should.have.status(200);
@@ -114,6 +125,7 @@ describe('Delete events DB', () => {
         const updatedEvent = {id: event._id, title: "Webinar TDD con CHAI"};
         chai.request(app)
           .put('/events/' + event._id)
+          .auth('test', 'testPassword')
           .send(updatedEvent)
           .end((err,res) => {
             res.should.have.status(200);
@@ -130,7 +142,8 @@ describe('Delete events DB', () => {
     it('it shouldn\'t PUT a non existent event', (done) => {
       const updatedEvent = {id: 7, title: "Webinar TDD con CHAI", description: "Prueba con CHAI", date : "2017-04-15"};
       chai.request(app)
-        .put('/events' + 7)
+        .put('/events/' + 7)
+        .auth('test', 'testPassword')
         .send(updatedEvent)
         .end((err, res) => {
           res.should.have.status(404);
@@ -146,6 +159,7 @@ describe('Delete events DB', () => {
       newEvent.save((err,event) => {
         chai.request(app)
         .delete('/events/' + event._id)
+        .auth('test', 'testPassword')
         .end((err, res) => {
           res.should.have.status(200);
           res.body.should.be.a('string');
@@ -157,6 +171,7 @@ describe('Delete events DB', () => {
     it('it shouldn\'t DELETE a non existent event', (done) => {
       chai.request(app)
         .delete('/events/' + 9)
+        .auth('test', 'testPassword')
         .end((err, res) => {
           res.should.have.status(404);
           res.body.should.be.eql({});
@@ -173,6 +188,7 @@ describe('Delete events DB', () => {
           newEvent2.save((err,newEvent2) => {
           chai.request(app)
           .get('/events/title/' + "feria")
+          .auth('test', 'testPassword')
           .end((err, res) => {
             res.should.have.status(200);
             res.body.should.be.a('array');

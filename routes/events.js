@@ -20,7 +20,9 @@ passport.use(new BasicStrategy(
   }
 ));
 
-router.get('/', passport.authenticate('basic', { session: false }), (req, res) => {
+router.all('*', passport.authenticate('basic', {session: false}));
+
+router.get('/', (req, res) => {
     eventManager.getAll()
     .then(
       events => res.json(events)
@@ -29,7 +31,7 @@ router.get('/', passport.authenticate('basic', { session: false }), (req, res) =
     )
 });
 
-router.get('/:id', passport.authenticate('basic', {session: false}), (req, res) => {
+router.get('/:id', (req, res) => {
   const idBuscado = req.params.id;
   eventManager.getEventById(idBuscado)
   .then(
@@ -46,7 +48,7 @@ router.get('/:id', passport.authenticate('basic', {session: false}), (req, res) 
   )
 });
 
-router.get('/title/:title', passport.authenticate('basic', {session: false}), (req,res) => {
+router.get('/title/:title', (req,res) => {
   const titleBuscado = req.params.title;
   eventManager.getEventsByTitle(titleBuscado)
   .then(
@@ -56,7 +58,7 @@ router.get('/title/:title', passport.authenticate('basic', {session: false}), (r
   )
 });
 
-router.post('/', passport.authenticate('basic', {session: false}), (req,res) => {
+router.post('/', (req,res) => {
   eventManager.createEvent(req.body.id, req.body.title, req.body.description, req.body.date)
   .then(
     event => {
@@ -71,7 +73,7 @@ router.post('/', passport.authenticate('basic', {session: false}), (req,res) => 
   )
 });
 
-router.put('/:id', passport.authenticate('basic', {session: false}), (req,res) => {
+router.put('/:id', (req,res) => {
   eventManager.updateEvent(req.params.id, req.body.title, req.body.description, req.body.date)
   .then(
     event => {
@@ -87,7 +89,7 @@ router.put('/:id', passport.authenticate('basic', {session: false}), (req,res) =
   )
 });
 
-router.delete('/:id', passport.authenticate('basic', {session: false}), (req, res) => {
+router.delete('/:id', (req, res) => {
   eventManager.deleteEvent(req.params.id)
   .then(
     event => {
