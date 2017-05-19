@@ -20,8 +20,7 @@ passport.use(new BasicStrategy(
   }
 ));
 
-router.get('/',
-  passport.authenticate('basic', { session: false }), (req, res) => {
+router.get('/', passport.authenticate('basic', { session: false }), (req, res) => {
     eventManager.getAll()
     .then(
       events => res.json(events)

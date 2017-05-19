@@ -11,6 +11,7 @@ const userSchema = mongoose.Schema(
 );
 
 userSchema.methods.verifyPassword = function(password) {
+  // no utilizamos Arrow Function ya que interfiere con el contexto de this:	
   return this.password === password;
 }
 
