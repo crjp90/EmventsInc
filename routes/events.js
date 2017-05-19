@@ -29,7 +29,7 @@ router.get('/', passport.authenticate('basic', { session: false }), (req, res) =
     )
 });
 
-router.get('/:id', (req, res) => {
+router.get('/:id', passport.authenticate('basic', {session: false}), (req, res) => {
   const idBuscado = req.params.id;
   eventManager.getEventById(idBuscado)
   .then(
@@ -44,9 +44,9 @@ router.get('/:id', (req, res) => {
   ).catch(
     error => res.status(500).send('Se encontró un error ' + error)
   )
-})
+});
 
-router.get('/title/:title', (req,res) => {
+router.get('/title/:title', passport.authenticate('basic', {session: false}), (req,res) => {
   const titleBuscado = req.params.title;
   eventManager.getEventsByTitle(titleBuscado)
   .then(
@@ -56,7 +56,7 @@ router.get('/title/:title', (req,res) => {
   )
 });
 
-router.post('/', (req,res) => {
+router.post('/', passport.authenticate('basic', {session: false}), (req,res) => {
   eventManager.createEvent(req.body.id, req.body.title, req.body.description, req.body.date)
   .then(
     event => {
@@ -69,9 +69,9 @@ router.post('/', (req,res) => {
   ).catch(
     error => res.status(500).send('Se encontró un error ' + error)
   )
-})
+});
 
-router.put('/:id', (req,res) => {
+router.put('/:id', passport.authenticate('basic', {session: false}), (req,res) => {
   eventManager.updateEvent(req.params.id, req.body.title, req.body.description, req.body.date)
   .then(
     event => {
@@ -85,9 +85,9 @@ router.put('/:id', (req,res) => {
   .catch(
     error => res.status(500).send('Se encontró un error ' + error)
   )
-})
+});
 
-router.delete('/:id', (req, res) => {
+router.delete('/:id', passport.authenticate('basic', {session: false}), (req, res) => {
   eventManager.deleteEvent(req.params.id)
   .then(
     event => {
@@ -102,6 +102,6 @@ router.delete('/:id', (req, res) => {
   .catch(
     error => res.status(500).send('Se encontró un error ' + error)
   )
-})
+});
 
 module.exports = router;
