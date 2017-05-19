@@ -53,7 +53,7 @@ function getEventsByTitle(title){
   });
 }
 
-function createEvent(_id,title,description,date){
+function createEvent(_id,title,description,date, username){
   return new Promise( function (resolve, reject) {
     try{
       EventModel.findById(Number(_id), (err, event) => {
@@ -67,7 +67,8 @@ function createEvent(_id,title,description,date){
               _id : _id,
               title: title,
               description: description,
-              date:  new Date(date)
+              date:  new Date(date),
+              username: username
             });
 
             newEvent.save((err) => {

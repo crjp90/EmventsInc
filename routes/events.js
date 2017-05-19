@@ -4,6 +4,10 @@ const BasicStrategy = require('passport-http').BasicStrategy;
 const router = express.Router();
 const eventManager = require('./eventsManager');
 const User = require('../models/user.js');
+const mongoose = require('mongoose');
+let acl = require('acl');
+
+acl = new acl(new acl.mongodbBackend(mongoose.connection.db, 'acl_'));
 
 passport.use(new BasicStrategy(
   (username, password, done) => {
@@ -59,7 +63,7 @@ router.get('/title/:title', (req,res) => {
 });
 
 router.post('/', (req,res) => {
-  eventManager.createEvent(req.body.id, req.body.title, req.body.description, req.body.date)
+  eventManager.createEvent(req.body.id, req.body.title, req.body.description, req.body.date, req.user.username)
   .then(
     event => {
       if(event != undefined ){

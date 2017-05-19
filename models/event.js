@@ -23,7 +23,8 @@ const eventSchema = new Schema(
     _id: { type: Number, required: true },
     title: { type: String, required: true, index: true},
     description: { type: String, required: true },
-    date: { type: Date }
+    date: { type: Date },
+    username: { type: String, required: true, index: true}
   }
 );
 
