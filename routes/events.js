@@ -62,6 +62,16 @@ router.get('/title/:title', (req,res) => {
   )
 });
 
+router.get('/organizer/:organizer', (req,res) => {
+  const organizer = req.params.organizer;
+  eventManager.getEventsByOrganizer(organizer)
+  .then(
+    events => res.json(events)
+  ).catch(
+    error => res.status(500).send('Se encontró un error ' + error)
+  )
+});
+
 router.post('/', (req,res) => {
   eventManager.createEvent(req.body.id, req.body.title, req.body.description, req.body.date, req.user._id)
   .then(

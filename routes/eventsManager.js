@@ -53,6 +53,22 @@ function getEventsByTitle(title){
   });
 }
 
+function getEventsByOrganizer(organizer){
+  return new Promise( function (resolve,reject){
+    try{
+      EventModel.find({ "organizer": organizer}, (err,events) => {
+        if(err){
+          reject(err);
+        }else{
+          resolve(events);
+        }
+      });
+    }catch(ex){
+      reject(ex);
+    }
+  });
+}
+
 function createEvent(_id,title,description,date, organizerId){
   return new Promise( function (resolve, reject) {
     try{
@@ -126,7 +142,7 @@ function updateEvent(_id, title, description, date, userId) {
                   resolve(event);
                 }
               });
-            }           
+            }
           }
           else{
             resolve(-1);
@@ -175,4 +191,4 @@ function deleteEvent(_id, userId){
   });
 }
 
-module.exports = {getAll, getEventById, getEventsByTitle, createEvent, updateEvent, deleteEvent};
+module.exports = {getAll, getEventById, getEventsByTitle, getEventsByOrganizer, createEvent, updateEvent, deleteEvent};
