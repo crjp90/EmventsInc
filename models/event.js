@@ -24,7 +24,8 @@ const eventSchema = new Schema(
     title: { type: String, required: true, index: true},
     description: { type: String, required: true },
     date: { type: Date },
-    organizer: { type: Schema.Types.ObjectId, required: true, index: true, ref: 'User'}
+    organizer: { type: Schema.Types.ObjectId, required: true, index: true, ref: 'User'},
+    signedUpUsers: {type: Array, required: false, index: true, ref: 'User'}
   }
 );
 

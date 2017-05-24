@@ -72,6 +72,22 @@ router.get('/organizer/:organizer', (req,res) => {
   )
 });
 
+router.get('/:eventid/signup', (req,res) => {
+  const eventid = req.params.eventid;
+  eventManager.signupToEvent(eventid, req.user._id)
+  .then(
+    event => {
+      if (event == -1) {
+        res.status(404).send('No se puede registrar a un evento que no existe')
+      }else{
+        res.status(200).json(event)
+      }
+    }
+  ).catch(
+    error => res.status(500).send('Se encontró un error ' + error)
+  )
+});
+
 router.post('/', (req,res) => {
   eventManager.createEvent(req.body.id, req.body.title, req.body.description, req.body.date, req.user._id)
   .then(
