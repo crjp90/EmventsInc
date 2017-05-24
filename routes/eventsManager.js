@@ -114,7 +114,19 @@ function updateEvent(_id, title, description, date, userId) {
               if (description != undefined) {
                 event.description = description;
               }
-            });
+              if (date != undefined) {
+                event.date = date;
+              }
+              event.save((err) =>{
+                if(err){
+                  reject(err);
+                }
+                else{
+                  console.log("Updated the event with the field _id equal to " + _id);
+                  resolve(event);
+                }
+              });
+            }           
           }
           else{
             resolve(-1);
