@@ -53,7 +53,7 @@ function getEventsByTitle(title){
   });
 }
 
-function createEvent(_id,title,description,date, username){
+function createEvent(_id,title,description,date, organizerId){
   return new Promise( function (resolve, reject) {
     try{
       EventModel.findById(Number(_id), (err, event) => {
@@ -68,7 +68,7 @@ function createEvent(_id,title,description,date, username){
               title: title,
               description: description,
               date:  new Date(date),
-              username: username
+              organizer: organizerId
             });
 
             newEvent.save((err) => {
@@ -95,7 +95,7 @@ function createEvent(_id,title,description,date, username){
   });
 }
 
-function updateEvent(_id, title, description, date) {
+function updateEvent(_id, title, description, date, userId) {
   return new Promise( (resolve, reject) => {
     try {
       EventModel.findById(Number(_id), (err, event) => {
@@ -104,22 +104,15 @@ function updateEvent(_id, title, description, date) {
         }
         else{
           if (event) {
-            if (title != undefined) {
-              event.title = title;
+            if (String(event.organizer) != String(userId)) {
+              resolve(401);
             }
-            if (description != undefined) {
-              event.description = description;
-            }
-            if (date != undefined) {
-              event.date = date;
-            }
-            event.save((err) =>{
-              if(err){
-                reject(err);
+            else {
+              if (title != undefined) {
+                event.title = title;
               }
-              else{
-                console.log("Updated the event with the field _id equal to " + _id);
-                resolve(event);
+              if (description != undefined) {
+                event.description = description;
               }
             });
           }
@@ -135,7 +128,7 @@ function updateEvent(_id, title, description, date) {
   });
 }
 
-function deleteEvent(_id){
+function deleteEvent(_id, userId){
     return new Promise( function (resolve, reject) {
       try{
         EventModel.findById(Number(_id), (err, event) => {
@@ -144,15 +137,20 @@ function deleteEvent(_id){
           }
           else{
             if(event){
-              event.remove((err) => {
-                if(err){
-                  reject(err);
-                }
-                else{
-                  console.log("Deleted the event with the field _id equal to " + _id);
-                  resolve(_id);
-                }
-              });
+              if (String(event.organizer) != String(userId)) {
+                resolve(401);
+              }
+              else {
+                event.remove((err) => {
+                  if(err){
+                    reject(err);
+                  }
+                  else{
+                    console.log("Deleted the event with the field _id equal to " + _id);
+                    resolve(_id);
+                  }
+                });
+              }
             }
             else{
               resolve(-1);

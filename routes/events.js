@@ -63,7 +63,7 @@ router.get('/title/:title', (req,res) => {
 });
 
 router.post('/', (req,res) => {
-  eventManager.createEvent(req.body.id, req.body.title, req.body.description, req.body.date, req.user.username)
+  eventManager.createEvent(req.body.id, req.body.title, req.body.description, req.body.date, req.user._id)
   .then(
     event => {
       if(event != undefined ){
@@ -78,14 +78,19 @@ router.post('/', (req,res) => {
 });
 
 router.put('/:id', (req,res) => {
-  eventManager.updateEvent(req.params.id, req.body.title, req.body.description, req.body.date)
+  eventManager.updateEvent(req.params.id, req.body.title, req.body.description, req.body.date, req.user._id)
   .then(
     event => {
       if (event == -1) {
         res.status(404).send('No se puede actualizar un evento que no existe')
       }
       else {
-        res.status(200).json(event);
+        if (event == 401) {
+          res.status(401).send('Unauthorized');
+        }
+        else {
+          res.status(200).json(event);
+        }
       }
     })
   .catch(
@@ -94,15 +99,20 @@ router.put('/:id', (req,res) => {
 });
 
 router.delete('/:id', (req, res) => {
-  eventManager.deleteEvent(req.params.id)
+  eventManager.deleteEvent(req.params.id, req.user._id)
   .then(
     event => {
       if (event == -1) {
         res.status(404).send('No se puede eliminar un evento que no existe');
       }
-      else
-      {
-        res.status(200).json(event);
+      else {
+        if (event == 401) {
+          res.status(401).send('Unauthorized');
+        }
+        else
+        {
+          res.status(200).json(event);
+        }
       }
     })
   .catch(
