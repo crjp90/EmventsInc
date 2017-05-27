@@ -7,7 +7,24 @@ const User = require('../models/user.js');
 const mongoose = require('mongoose');
 let acl = require('acl');
 
+console.log(mongoose.connection.db);
 acl = new acl(new acl.mongodbBackend(mongoose.connection.db, 'acl_'));
+
+// Organizers are allowed to:
+// - Create
+// - Update
+// - Delete
+// - List users signed up to their events
+acl.allow('organizer', '/', ['edit', 'view', 'post']);
+
+// Attendees are allowed to:
+// - Sign up to events
+acl.allow('attendee', '/', 'get');
+acl.allow('attendee', '/:eventid/signup', 'post');
+
+// prueba:
+acl.addUserRoles('ccalvarez', 'attendee');
+acl.addUserRoles('test', 'organizer');
 
 passport.use(new BasicStrategy(
   (username, password, done) => {
@@ -26,7 +43,7 @@ passport.use(new BasicStrategy(
 
 router.all('*', passport.authenticate('basic', {session: false}));
 
-router.get('/', (req, res) => {
+router.get('/', acl.middleware(), (req, res) => {
     eventManager.getAll()
     .then(
       events => res.json(events)
@@ -72,7 +89,7 @@ router.get('/organizer/:organizer', (req,res) => {
   )
 });
 
-router.get('/:eventid/signup', (req,res) => {
+router.post('/:eventid/signup', (req,res) => {
   const eventid = req.params.eventid;
   eventManager.signupToEvent(eventid, req.user._id)
   .then(
@@ -80,7 +97,12 @@ router.get('/:eventid/signup', (req,res) => {
       if (event == -1) {
         res.status(404).send('No se puede registrar a un evento que no existe')
       }else{
-        res.status(200).json(event)
+        if (event == 422) {
+          res.status(422).send('Ya se encuentra registrado en este evento');
+        }
+        else {
+          res.status(200).json(event)
+        }
       }
     }
   ).catch(
@@ -88,7 +110,7 @@ router.get('/:eventid/signup', (req,res) => {
   )
 });
 
-router.post('/', (req,res) => {
+router.post('/', acl.middleware(), (req,res) => {
   eventManager.createEvent(req.body.id, req.body.title, req.body.description, req.body.date, req.user._id)
   .then(
     event => {

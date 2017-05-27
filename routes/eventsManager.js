@@ -77,14 +77,20 @@ function signupToEvent(eventid, userId){
           reject(err);
         }else{
           if(event){
-            event.signedUpUsers.push(userId);
-            event.save(err => {
-              if(err){
-                reject(err);
-              }else{
-                resolve(event);
-              }
-            })
+            let signUpEncontrado = event.signedUpUsers.find(usuarioRegistrado => String(usuarioRegistrado) == String(userId));
+            if (signUpEncontrado == undefined) {
+              event.signedUpUsers.push(userId);
+              event.save(err => {
+                if(err){
+                  reject(err);
+                }else{
+                  resolve(event);
+                }
+              })
+            } else {
+              resolve(422);
+            }
+            
           }else{
             resolve(-1);
           }
