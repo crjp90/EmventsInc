@@ -5,26 +5,28 @@ const router = express.Router();
 const eventManager = require('./eventsManager');
 const User = require('../models/user.js');
 const mongoose = require('mongoose');
-let acl = require('acl');
+const moduloacl = require('acl');
+// let acl = null;
 
-console.log(mongoose.connection.db);
-acl = new acl(new acl.mongodbBackend(mongoose.connection.db, 'acl_'));
+// acl = new moduloacl(new moduloacl.mongodbBackend(mongoose.connection.db, 'acl_'));
 
 // Organizers are allowed to:
 // - Create
 // - Update
 // - Delete
 // - List users signed up to their events
-acl.allow('organizer', '/', ['edit', 'view', 'post']);
 
-// Attendees are allowed to:
-// - Sign up to events
-acl.allow('attendee', '/', 'get');
-acl.allow('attendee', '/:eventid/signup', 'post');
+// acl.allow('organizer', '/events', ['edit', 'view', 'post']);
 
-// prueba:
-acl.addUserRoles('ccalvarez', 'attendee');
-acl.addUserRoles('test', 'organizer');
+// // Attendees are allowed to:
+// // - Sign up to events
+// acl.allow('attendee', '/events', 'get');
+// acl.allow('attendee', 'events/:eventid/signup', 'post');
+
+// // prueba:
+// acl.addUserRoles('ccalvarez', 'attendee');
+// acl.addUserRoles('test', 'organizer');
+
 
 passport.use(new BasicStrategy(
   (username, password, done) => {
@@ -43,8 +45,19 @@ passport.use(new BasicStrategy(
 
 router.all('*', passport.authenticate('basic', {session: false}));
 
-router.get('/', acl.middleware(), (req, res) => {
-    eventManager.getAll()
+router.get('/', (req, res) => {
+ //console.log(req.acl);
+acl.allowedPermissions('ccalvarez', ['/events'], function(err, permissions)
+    { console.log(' Los permisos son:');
+    console.log(permissions);
+    });
+
+acl.userRoles( 'ccalvarez', function(err, roles) {
+  console.log('los roles de ccalvarez son:');
+  console.log(roles);
+});
+
+     eventManager.getAll()
     .then(
       events => res.json(events)
     ).catch(
@@ -110,7 +123,7 @@ router.post('/:eventid/signup', (req,res) => {
   )
 });
 
-router.post('/', acl.middleware(), (req,res) => {
+router.post('/', (req,res) => {
   eventManager.createEvent(req.body.id, req.body.title, req.body.description, req.body.date, req.user._id)
   .then(
     event => {
