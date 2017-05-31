@@ -6,27 +6,9 @@ const eventManager = require('./eventsManager');
 const User = require('../models/user.js');
 const mongoose = require('mongoose');
 const moduloacl = require('acl');
-// let acl = null;
+let acl = null;
 
-// acl = new moduloacl(new moduloacl.mongodbBackend(mongoose.connection.db, 'acl_'));
-
-// Organizers are allowed to:
-// - Create
-// - Update
-// - Delete
-// - List users signed up to their events
-
-// acl.allow('organizer', '/events', ['edit', 'view', 'post']);
-
-// // Attendees are allowed to:
-// // - Sign up to events
-// acl.allow('attendee', '/events', 'get');
-// acl.allow('attendee', 'events/:eventid/signup', 'post');
-
-// // prueba:
-// acl.addUserRoles('ccalvarez', 'attendee');
-// acl.addUserRoles('test', 'organizer');
-
+acl = new moduloacl(new moduloacl.mongodbBackend(mongoose.connection.db));
 
 passport.use(new BasicStrategy(
   (username, password, done) => {
@@ -45,17 +27,28 @@ passport.use(new BasicStrategy(
 
 router.all('*', passport.authenticate('basic', {session: false}));
 
-router.get('/', (req, res) => {
- //console.log(req.acl);
-acl.allowedPermissions('ccalvarez', ['/events'], function(err, permissions)
-    { console.log(' Los permisos son:');
-    console.log(permissions);
+router.get('/', acl.middleware(), (req, res) => {
+
+  acl.allowedPermissions('ccalvarez', ['events'], function(err, permissions)
+    { 
+      console.log(' Los permisos de ccalvarez sobre events son:');
+      console.log(permissions);
     });
 
-acl.userRoles( 'ccalvarez', function(err, roles) {
-  console.log('los roles de ccalvarez son:');
-  console.log(roles);
-});
+  acl.userRoles( 'ccalvarez', function(err, roles) {
+      console.log('los roles de ccalvarez son:');
+      console.log(roles);
+  });
+
+  acl.allowedPermissions('test', ['events'], function(err, permissions)
+    { console.log(' Los permisos de test sobre events son:');
+      console.log(permissions);
+    });
+
+  acl.userRoles( 'test', function(err, roles) {
+      console.log('los roles de test son:');
+      console.log(roles);
+  });
 
      eventManager.getAll()
     .then(

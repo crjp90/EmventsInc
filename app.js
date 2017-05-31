@@ -1,12 +1,15 @@
 const express = require('express')
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
-// const moduloacl = require('acl');
-// let acl = null;
+const aclManager = require('./aclManager');
+
+aclManager.initACL();
 
 const events = require('./routes/events');
 const users = require('./routes/users');
 const app = express();
+
+
 
 // let mongoBackend = new moduloacl.mongodbBackend(mongoose.connection.db);
 

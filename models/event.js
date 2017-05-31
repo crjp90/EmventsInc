@@ -1,43 +1,43 @@
 let Event = null;
-let acl = null;
+// let acl = null;
 const mongoose = require('mongoose');
-const moduloacl = require('acl');
+// const moduloacl = require('acl');
 
 const connString = 'mongodb://localhost:27017/events';
 mongoose.connect(connString);
 
-function logger() 
-{ 
-    return { debug: function( msg ) { console.log( '-DEBUG-', msg ); } }; 
-}
+// function logger() 
+// { 
+//     return { debug: function( msg ) { console.log( '-DEBUG-', msg ); } }; 
+// }
 
 mongoose.connection.on('connected',  () => {
   console.log('Mongoose default connection open to ' + connString);
-  console.log(mongoose.connection._hasOpened);
+  // console.log(mongoose.connection._hasOpened);
 
-  let mongoBackend = new moduloacl.mongodbBackend(mongoose.connection.db);
-  acl = new moduloacl(mongoBackend, logger());
+  // let mongoBackend = new moduloacl.mongodbBackend(mongoose.connection.db);
+  // acl = new moduloacl(mongoBackend, logger());
   
-  acl.allow('organizer', '/events', ['edit', 'view', 'post']);
+//   acl.allow('organizer', '/events', ['edit', 'view', 'post']);
 
-  // Attendees are allowed to:
-  // - Sign up to events
-  acl.allow('attendee', ['/events', 'events/:eventid/signup'], 'get');
-  //acl.allow('attendee', 'events/:eventid/signup', 'post');
+//   // Attendees are allowed to:
+//   // - Sign up to events
+//   acl.allow('attendee', ['/events', 'events/:eventid/signup'], 'get');
+//   //acl.allow('attendee', 'events/:eventid/signup', 'post');
 
-  // prueba:
-  acl.addUserRoles('ccalvarez', 'attendee');
-  acl.addUserRoles('test', 'organizer');
+//   // prueba:
+//   acl.addUserRoles('ccalvarez', 'attendee');
+//   acl.addUserRoles('test', 'organizer');
 
-  acl.allowedPermissions('ccalvarez', ['/events'], function(err, permissions)
-    { console.log(' Los permisos son:');
-    console.log(permissions);
-    });
+//   acl.allowedPermissions('ccalvarez', ['/events'], function(err, permissions)
+//     { console.log(' Los permisos son:');
+//     console.log(permissions);
+//     });
 
-acl.userRoles( 'ccalvarez', function(err, roles) {
-  console.log('los roles de ccalvarez son:');
-  console.log(roles);
-});
+// acl.userRoles( 'ccalvarez', function(err, roles) {
+//   console.log('los roles de ccalvarez son:');
+//   console.log(roles);
+// });
 
 });
 
