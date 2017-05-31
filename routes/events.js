@@ -8,7 +8,14 @@ const mongoose = require('mongoose');
 const moduloacl = require('acl');
 let acl = null;
 
-acl = new moduloacl(new moduloacl.mongodbBackend(mongoose.connection.db));
+function logger() 
+{ 
+    return { debug: function( msg ) { console.log( '-DEBUG-', msg ); } }; 
+}
+//acl = new moduloacl(new moduloacl.mongodbBackend(mongoose.connection.db));
+
+let mongoBackend = new moduloacl.mongodbBackend(mongoose.connection.db);
+acl = new moduloacl(mongoBackend, logger());
 
 passport.use(new BasicStrategy(
   (username, password, done) => {
