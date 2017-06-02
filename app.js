@@ -1,15 +1,17 @@
 const express = require('express')
+const bodyParser = require('body-parser');
+const mongoose = require('mongoose');
+const events = require('./routes/events');
+const users = require('./routes/users');
+const app = express();
 
-const app = express()
+app.use(bodyParser.json());
 
-app.get('/', (req, res) => {
-  res.send('Got a GET request!')
-})
-
-app.post('/', (req, res) => {
-  res.send('Got a POST request')
-})
+app.use('/events', events);
+app.use('/users', users);
 
 app.listen(3000, () => {
   console.log('Example app listening on port 3000!')
 })
+
+module.exports = app;
