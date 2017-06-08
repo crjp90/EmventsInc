@@ -4,6 +4,18 @@ const BasicStrategy = require('passport-http').BasicStrategy;
 const router = express.Router();
 const eventManager = require('./eventsManager');
 const User = require('../models/user.js');
+const mongoose = require('mongoose');
+const moduloacl = require('acl');
+let acl = null;
+
+
+function logger() 
+{ 
+    return { debug: function( msg ) { console.log( '-DEBUG-', msg ); } }; 
+}
+
+ let mongoBackend = new moduloacl.mongodbBackend(mongoose.connection.db);
+ acl = new moduloacl(mongoBackend, logger());
 
 passport.use(new BasicStrategy(
   (username, password, done) => {
@@ -22,8 +34,9 @@ passport.use(new BasicStrategy(
 
 router.all('*', passport.authenticate('basic', {session: false}));
 
-router.get('/', (req, res) => {
-    eventManager.getAll()
+router.get('/', [authenticated, acl.middleware( 1, get_user_id) ], (req, res) => {
+  console.log('req.url is: ' + req.url);
+     eventManager.getAll()
     .then(
       events => res.json(events)
     ).catch(
@@ -31,7 +44,18 @@ router.get('/', (req, res) => {
     )
 });
 
-router.get('/:id', (req, res) => {
+function get_user_id(request, response)  {
+  return request.user && request.user.id.toString()  || false;
+}
+
+function authenticated(request, response, next) {
+  if (request.isAuthenticated() ) {
+    return next();
+  }
+  response.send(401, 'User not authenticated');
+}
+
+router.get('/:id', [authenticated, acl.middleware( 2, get_user_id) ], (req, res) => {
   const idBuscado = req.params.id;
   eventManager.getEventById(idBuscado)
   .then(
@@ -48,7 +72,7 @@ router.get('/:id', (req, res) => {
   )
 });
 
-router.get('/title/:title', (req,res) => {
+router.get('/title/:title', [authenticated, acl.middleware( 1, get_user_id) ], (req,res) => {
   const titleBuscado = req.params.title;
   eventManager.getEventsByTitle(titleBuscado)
   .then(
@@ -58,8 +82,39 @@ router.get('/title/:title', (req,res) => {
   )
 });
 
-router.post('/', (req,res) => {
-  eventManager.createEvent(req.body.id, req.body.title, req.body.description, req.body.date)
+router.get('/organizer/:organizer', [authenticated, acl.middleware( 1, get_user_id) ], (req,res) => {
+  const organizer = req.params.organizer;
+  eventManager.getEventsByOrganizer(organizer)
+  .then(
+    events => res.json(events)
+  ).catch(
+    error => res.status(500).send('Se encontró un error ' + error)
+  )
+});
+
+router.post('/:eventid/signup', [authenticated, acl.middleware( 3, get_user_id) ], (req,res) => {
+  const eventid = req.params.eventid;
+  eventManager.signupToEvent(eventid, req.user._id)
+  .then(
+    event => {
+      if (event == -1) {
+        res.status(404).send('No se puede registrar a un evento que no existe')
+      }else{
+        if (event == 422) {
+          res.status(422).send('Ya se encuentra registrado en este evento');
+        }
+        else {
+          res.status(200).json(event)
+        }
+      }
+    }
+  ).catch(
+    error => res.status(500).send('Se encontró un error ' + error)
+  )
+});
+
+router.post('/', [authenticated, acl.middleware( 1, get_user_id) ], (req,res) => {
+  eventManager.createEvent(req.body.id, req.body.title, req.body.description, req.body.date, req.user._id)
   .then(
     event => {
       if(event != undefined ){
@@ -73,15 +128,20 @@ router.post('/', (req,res) => {
   )
 });
 
-router.put('/:id', (req,res) => {
-  eventManager.updateEvent(req.params.id, req.body.title, req.body.description, req.body.date)
+router.put('/:id', [authenticated, acl.middleware( 2, get_user_id) ], (req,res) => {
+  eventManager.updateEvent(req.params.id, req.body.title, req.body.description, req.body.date, req.user._id)
   .then(
     event => {
       if (event == -1) {
         res.status(404).send('No se puede actualizar un evento que no existe')
       }
       else {
-        res.status(200).json(event);
+        if (event == 401) {
+          res.status(401).send('Unauthorized');
+        }
+        else {
+          res.status(200).json(event);
+        }
       }
     })
   .catch(
@@ -89,16 +149,22 @@ router.put('/:id', (req,res) => {
   )
 });
 
-router.delete('/:id', (req, res) => {
-  eventManager.deleteEvent(req.params.id)
+router.delete('/:id', [authenticated, acl.middleware( 2, get_user_id) ], (req, res) => {
+  // console.log('req.url is: ' + req.url);
+  eventManager.deleteEvent(req.params.id, req.user._id)
   .then(
     event => {
       if (event == -1) {
         res.status(404).send('No se puede eliminar un evento que no existe');
       }
-      else
-      {
-        res.status(200).json(event);
+      else {
+        if (event == 401) {
+          res.status(401).send('Unauthorized');
+        }
+        else
+        {
+          res.status(200).json(event);
+        }
       }
     })
   .catch(
