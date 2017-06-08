@@ -26,4 +26,26 @@ function createUser(username,password,email, fullname){
   });
 }
 
-module.exports = {createUser};
+function getUserByUsername(username) {
+  return new Promise((resolve,reject) => {
+    try {
+      UserModel.findOne({ username: username}, (err, user) => {
+        if (err) {reject(err) }
+          else{
+            if (!user) {
+              resolve(undefined);
+            }
+            else
+            {
+              resolve(user);
+            }
+          }
+        });
+      }
+    catch(ex){
+      reject(ex);
+    }
+   });
+}
+
+module.exports = {createUser, getUserByUsername};

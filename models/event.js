@@ -13,7 +13,7 @@ function logger()
 
 mongoose.connection.on('connected',  () => {
   console.log('Mongoose default connection open to ' + connString);
-  console.log('connection.hasOpened: ' + mongoose.connection._hasOpened);
+  // console.log('connection.hasOpened: ' + mongoose.connection._hasOpened);
 
   let mongoBackend = new moduloacl.mongodbBackend(mongoose.connection.db);
   acl = new moduloacl(mongoBackend, logger());
@@ -22,21 +22,23 @@ mongoose.connection.on('connected',  () => {
       {
           roles:['organizer'],
           allows:[
-              {resources:'events', permissions: ['get', 'view', 'post']},
-              {resources:'events/:eventid', permissions: ['put', 'delete']}
+              {resources:'/events', permissions: ['get', 'view', 'post']},
+              {resources:'/events/:eventid', permissions: ['put', 'delete']}
           ]
       },
       {
           roles:['attendee'],
           allows:[
-              {resources:'events', permissions:['get', 'view']},
-              {resources:['events/:eventid/signup'], permissions:['post']}
+              {resources: '/events', permissions:['get', 'view']},
+              {resources: '/events/:eventid/signup', permissions:['post']}
           ]
       }
   ])
 
-    acl.addUserRoles('592e1bdeccedc444acdfc2b6', 'attendee');  /*crjp*/
-    acl.addUserRoles('592e03e1415b34497c3c663e', 'organizer');  /*test*/
+    // acl.addUserRoles('592e1bdeccedc444acdfc2b6', 'attendee');  /*crjp*/
+    // acl.addUserRoles('592e03e1415b34497c3c663e', 'organizer');  /*test*/
+
+    // Instead use /POST /users/:username/roles/:role endpoint to assign a role to a user!
 
 });
 

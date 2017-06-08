@@ -5,7 +5,7 @@ const router = express.Router();
 const eventManager = require('./eventsManager');
 const User = require('../models/user.js');
 const mongoose = require('mongoose');
- const moduloacl = require('acl');
+const moduloacl = require('acl');
 let acl = null;
 
 
@@ -16,18 +16,6 @@ function logger()
 
  let mongoBackend = new moduloacl.mongodbBackend(mongoose.connection.db);
  acl = new moduloacl(mongoBackend, logger());
-
-function aclMiddleware(req, res, next) {
-  acl.isAllowed(req.user._id, req.url, req.method, (err, isAllowed) => {
-    console.log(isAllowed);
-    if(isAllowed) {
-      next();
-    }
-    else {
-      res.notAllowed;
-    }
-  });
-}
 
 passport.use(new BasicStrategy(
   (username, password, done) => {
@@ -47,6 +35,7 @@ passport.use(new BasicStrategy(
 router.all('*', passport.authenticate('basic', {session: false}));
 
 router.get('/', [authenticated, acl.middleware( 1, get_user_id) ], (req, res) => {
+  console.log('req.url is: ' + req.url);
      eventManager.getAll()
     .then(
       events => res.json(events)
@@ -66,7 +55,7 @@ function authenticated(request, response, next) {
   response.send(401, 'User not authenticated');
 }
 
-router.get('/:id', [authenticated, acl.middleware( 1, get_user_id) ], (req, res) => {
+router.get('/:id', [authenticated, acl.middleware( 2, get_user_id) ], (req, res) => {
   const idBuscado = req.params.id;
   eventManager.getEventById(idBuscado)
   .then(
@@ -103,7 +92,7 @@ router.get('/organizer/:organizer', [authenticated, acl.middleware( 1, get_user_
   )
 });
 
-router.post('/:eventid/signup', [authenticated, acl.middleware( 1, get_user_id) ], (req,res) => {
+router.post('/:eventid/signup', [authenticated, acl.middleware( 3, get_user_id) ], (req,res) => {
   const eventid = req.params.eventid;
   eventManager.signupToEvent(eventid, req.user._id)
   .then(
@@ -139,7 +128,7 @@ router.post('/', [authenticated, acl.middleware( 1, get_user_id) ], (req,res) =>
   )
 });
 
-router.put('/:id', [authenticated, acl.middleware( 1, get_user_id) ], (req,res) => {
+router.put('/:id', [authenticated, acl.middleware( 2, get_user_id) ], (req,res) => {
   eventManager.updateEvent(req.params.id, req.body.title, req.body.description, req.body.date, req.user._id)
   .then(
     event => {
@@ -160,7 +149,8 @@ router.put('/:id', [authenticated, acl.middleware( 1, get_user_id) ], (req,res) 
   )
 });
 
-router.delete('/:id', [authenticated, acl.middleware( 1, get_user_id) ], (req, res) => {
+router.delete('/:id', [authenticated, acl.middleware( 2, get_user_id) ], (req, res) => {
+  // console.log('req.url is: ' + req.url);
   eventManager.deleteEvent(req.params.id, req.user._id)
   .then(
     event => {
