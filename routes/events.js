@@ -92,7 +92,7 @@ router.get('/organizer/:organizer', [authenticated, acl.middleware( 1, get_user_
   )
 });
 
-router.post('/:eventid/signup', [authenticated, acl.middleware( 3, get_user_id) ], (req,res) => {
+router.post('/:eventid/signup', /*[authenticated, acl.middleware( 3, get_user_id) ],*/ (req,res) => {
   const eventid = req.params.eventid;
   eventManager.signupToEvent(eventid, req.user._id)
   .then(
@@ -113,7 +113,7 @@ router.post('/:eventid/signup', [authenticated, acl.middleware( 3, get_user_id) 
   )
 });
 
-router.post('/', [authenticated, acl.middleware( 1, get_user_id) ], (req,res) => {
+router.post('/', /*[authenticated, acl.middleware( 1, get_user_id) ],*/ (req,res) => {
   eventManager.createEvent(req.body.id, req.body.title, req.body.description, req.body.date, req.user._id)
   .then(
     event => {

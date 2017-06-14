@@ -1,9 +1,29 @@
 const express = require('express');
+const passport = require('passport')
+const BasicStrategy = require('passport-http').BasicStrategy;
+const User = require('../models/user.js');
 const router = express.Router();
 const userManager = require('./usersManager');
 const mongoose = require('mongoose');
 const moduloacl = require('acl');
 let acl = null;
+
+passport.use(new BasicStrategy(
+  (username, password, done) => {
+    User.findOne({ username: username }, (err, user) => {
+      if (err) {
+        return done(err); }
+      if (!user) {
+        return done(null, false); }
+      if (!user.verifyPassword(password)) {
+        return done(null, false);
+      }
+      return done(null, user);
+    });
+  }
+));
+
+router.all('/:id/events', passport.authenticate('basic', {session: false}));
 
 
 function logger() 
@@ -24,6 +44,18 @@ router.post('/', (req,res) => {
         res.status(409).send('Ya existe un usuario con ese username');
       }
     }
+  ).catch(
+    error => res.status(500).send('Se encontró un error ' + error)
+  )
+});
+
+/* REQ4 - Obtiene eventos próximos de un usuario */
+
+router.get('/:id/events', /*[authenticated, acl.middleware( 1, get_user_id) ],*/ (req,res) => {
+  const userId = req.params.id;
+  userManager.getUpcomingEventsByUser(userId)
+  .then(
+    events => res.json(events)
   ).catch(
     error => res.status(500).send('Se encontró un error ' + error)
   )
