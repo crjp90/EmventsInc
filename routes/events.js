@@ -9,9 +9,9 @@ const moduloacl = require('acl');
 let acl = null;
 
 
-function logger() 
-{ 
-    return { debug: function( msg ) { console.log( '-DEBUG-', msg ); } }; 
+function logger()
+{
+    return { debug: function( msg ) { console.log( '-DEBUG-', msg ); } };
 }
 
  let mongoBackend = new moduloacl.mongodbBackend(mongoose.connection.db);
@@ -87,6 +87,25 @@ router.get('/organizer/:organizer', [authenticated, acl.middleware( 1, get_user_
   eventManager.getEventsByOrganizer(organizer)
   .then(
     events => res.json(events)
+  ).catch(
+    error => res.status(500).send('Se encontró un error ' + error)
+  )
+});
+
+router.get('/:eventid/users', (req,res) => {
+  eventManager.getUsersByEvent(req.params.eventid, req.user._id)
+  .then(
+    users => {
+      if(users == -1){
+        res.status(404).send("No se puede encontrar el evento")
+      }else{
+        if(users == 401){
+          res.status(401).send('Unauthorized');
+        }else{
+          res.json(users)
+        }
+      }
+    }
   ).catch(
     error => res.status(500).send('Se encontró un error ' + error)
   )

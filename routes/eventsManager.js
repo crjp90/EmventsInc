@@ -69,6 +69,32 @@ function getEventsByOrganizer(organizer){
   });
 }
 
+function getUsersByEvent(eventid, organizerId){
+  return new Promise( function (resolve, reject) {
+    try{
+      EventModel.findById(Number(eventid), (err, event) => {
+        if(err){
+          reject(err);
+        }
+        else{
+          if(event){
+            if (String(event.organizer) != String(organizerId)) {
+              resolve(401);
+            }
+            else{
+              resolve(event.signedUpUsers);
+            }
+          }else{
+            resolve(-1);
+          }
+        }
+      }).populate('signedUpUsers')
+    }catch(ex){
+      reject(ex);
+    }
+  });
+}
+
 function signupToEvent(eventid, userId){
   return new Promise( function (resolve, reject){
     try{
@@ -90,7 +116,7 @@ function signupToEvent(eventid, userId){
             } else {
               resolve(422);
             }
-            
+
           }else{
             resolve(-1);
           }
@@ -224,4 +250,4 @@ function deleteEvent(_id, userId){
   });
 }
 
-module.exports = {getAll, getEventById, getEventsByTitle, getEventsByOrganizer, signupToEvent,createEvent, updateEvent, deleteEvent};
+module.exports = {getAll, getEventById, getEventsByTitle, getEventsByOrganizer, getUsersByEvent, signupToEvent,createEvent, updateEvent, deleteEvent};

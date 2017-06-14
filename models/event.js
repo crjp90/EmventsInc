@@ -6,9 +6,9 @@ const moduloacl = require('acl');
 const connString = 'mongodb://localhost:27017/events';
 mongoose.connect(connString);
 
-function logger() 
-{ 
-    return { debug: function( msg ) { console.log( '-DEBUG-', msg ); } }; 
+function logger()
+{
+    return { debug: function( msg ) { console.log( '-DEBUG-', msg ); } };
 }
 
 mongoose.connection.on('connected',  () => {
@@ -17,7 +17,7 @@ mongoose.connection.on('connected',  () => {
 
   let mongoBackend = new moduloacl.mongodbBackend(mongoose.connection.db);
   acl = new moduloacl(mongoBackend, logger());
-  
+
   acl.allow([
       {
           roles:['organizer'],
@@ -51,7 +51,6 @@ mongoose.connection.on('error', (err) => {
   });
 });
 
-// When the connection is disconnected
 mongoose.connection.on('disconnected', () => {
   console.log('Mongoose default connection disconnected');
 });
@@ -63,8 +62,8 @@ const eventSchema = new Schema(
     title: { type: String, required: true, index: true},
     description: { type: String, required: true },
     date: { type: Date },
-    organizer: { type: Schema.Types.ObjectId, required: true, index: true, ref: 'User'},
-    signedUpUsers: {type: Array, required: false, index: true, ref: 'User'}
+    organizer: { type: Schema.Types.ObjectId, required: true, index: true, ref: 'Usuario'},
+    signedUpUsers: [{type: Schema.Types.ObjectId, ref: 'Usuario'}]
   }
 );
 
