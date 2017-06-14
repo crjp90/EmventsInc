@@ -49,7 +49,6 @@ router.post('/', (req,res) => {
   )
 });
 
-/* REQ4 - Obtiene eventos próximos de un usuario */
 
 router.get('/:id/events', /*[authenticated, acl.middleware( 1, get_user_id) ],*/ (req,res) => {
   const userId = req.params.id;
