@@ -88,7 +88,10 @@ function getUsersByEvent(eventid, organizerId){
             resolve(-1);
           }
         }
-      }).populate('signedUpUsers')
+      }).populate({
+        path: 'signedUpUsers',
+        select: 'fullname email -_id'
+      })
     }catch(ex){
       reject(ex);
     }
