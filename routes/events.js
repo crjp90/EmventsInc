@@ -34,7 +34,7 @@ passport.use(new BasicStrategy(
 
 router.all('*', passport.authenticate('basic', {session: false}));
 
-router.get('/', [authenticated, acl.middleware( 1, get_user_id) ], (req, res) => {
+router.get('/', /*[authenticated, acl.middleware( 1, get_user_id) ],*/ (req, res) => {
   console.log('req.url is: ' + req.url);
      eventManager.getAll()
     .then(
@@ -55,7 +55,7 @@ function authenticated(request, response, next) {
   response.send(401, 'User not authenticated');
 }
 
-router.get('/:id', [authenticated, acl.middleware( 2, get_user_id) ], (req, res) => {
+router.get('/:id', /*[authenticated, acl.middleware( 2, get_user_id) ,*/ (req, res) => {
   const idBuscado = req.params.id;
   eventManager.getEventById(idBuscado)
   .then(
@@ -72,7 +72,7 @@ router.get('/:id', [authenticated, acl.middleware( 2, get_user_id) ], (req, res)
   )
 });
 
-router.get('/title/:title', [authenticated, acl.middleware( 1, get_user_id) ], (req,res) => {
+router.get('/title/:title', /*[authenticated, acl.middleware( 1, get_user_id) ],*/ (req,res) => {
   const titleBuscado = req.params.title;
   eventManager.getEventsByTitle(titleBuscado)
   .then(
