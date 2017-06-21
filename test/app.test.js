@@ -10,11 +10,11 @@ let savedOrganizerId = null;
 
 chai.use(chaiHttp);
 
-describe('Delete events and users collections, insert test user', () => {
- beforeEach(() => {
-        eventModel.remove({}, (err) => {
-        });
-        userModel.remove({}, (err) => {
+//describe('Delete events and users collections, insert tests users', () => {
+describe('', () => {
+
+ before(() => {
+  userModel.remove({}, (err) => {
         });
         const attendeeUser = new userModel({ username: 'attendeeUser', password: 'test', email: 'attendeeUser@test.com', fullname: 'Attendee User'});
         const organizerUser = new userModel({ username: 'organizerUser', password: 'test', email: 'organizerUser@test.com', fullname: 'Organizer User'});
@@ -46,6 +46,12 @@ describe('Delete events and users collections, insert test user', () => {
             });
           }
         });
+ });
+
+ beforeEach(() => {
+        eventModel.remove({}, (err) => {
+        });
+        
     });
 
   describe('/GET all events', () => {
@@ -65,12 +71,8 @@ describe('Delete events and users collections, insert test user', () => {
 
   describe('/GET event by id', () => {
     it('it should GET an event by its id', (done) => {
-      console.log("savedAttendeeId: "+ savedAttendeeId);
       const newEvent = new eventModel({_id: 1, title: "Feria de Libros", description: "Conferencias y venta", date : "2017-06-15", organizer: savedOrganizerId});
-      console.log(newEvent);
       newEvent.save((err, newEvent) => {
-        console.log('*******ERROR*******' + err);
-        console.log(newEvent);
         chai.request(app)
         .get('/events/' + newEvent._id)
         .auth('attendeeUser', 'test')
@@ -89,7 +91,7 @@ describe('Delete events and users collections, insert test user', () => {
     it('it should return status 404 if event doesn\'t exist', (done) => {
       chai.request(app)
         .get('/events/' + 6)
-        .auth('test', 'testPassword')
+        .auth('attendeeUser', 'test')
         .end((err, res) => {
           res.should.have.status(404);
           res.body.should.be.eql({});
@@ -99,11 +101,11 @@ describe('Delete events and users collections, insert test user', () => {
   });
 
   describe('/POST event ', () => {
-    it('it should POST an event',(done) => {
+    it('Organizer role should POST an event',(done) => {
       const newEvent = {id: 7, title: "Webinar TDD con CHAI", description: "Prueba con CHAI", date : "2017-04-15", organizer: savedOrganizerId};
       chai.request(app)
         .post('/events/')
-        .auth('test', 'testPassword')
+        .auth('organizerUser', 'test')
         .send(newEvent)
         .end((err,res) => {
           res.should.have.status(201);
@@ -116,13 +118,13 @@ describe('Delete events and users collections, insert test user', () => {
         })
     });
 
-    it('it shouldn\'t POST an existent event', (done) => {
+    it('Organizer role shouldn\'t POST an existent event', (done) => {
       const event = new eventModel({_id: 7, title: "Feria de Libros", description: "Conferencias y venta", date : "2017-06-15", organizer: savedOrganizerId});
       event.save((err, event) => {
         const newEvent = {id: 7, title: "Feria de Libros", description: "Conferencias y venta", date : "2017-06-15"};
         chai.request(app)
         .post('/events')
-        .auth('test', 'testPassword')
+        .auth('organizerUser', 'test')
         .send(newEvent)
         .end((err,res) => {
           res.should.have.status(409);
@@ -131,16 +133,34 @@ describe('Delete events and users collections, insert test user', () => {
         });
       });
     });
+
+    it('Attendee role shouldn\'t POST an event',(done) => {
+      const newEvent = {id: 7, title: "Webinar TDD con CHAI", description: "Prueba con CHAI", date : "2017-04-15", organizer: savedOrganizerId};
+      chai.request(app)
+        .post('/events/')
+        .auth('attendeeUser', 'test')
+        .send(newEvent)
+        .end((err,res) => {
+          res.should.have.status(500);
+          res.text.should.have.string('Insufficient permissions');
+          done();
+        })
+    });
+
+
   });
 
+  
+
+
   describe('/PUT event', () => {
-    it('it should PUT an existent event with all properties', (done) => {
+    it('organizer who created the event should PUT an existent event with all properties', (done) => {
       const newEvent = new eventModel({_id: 2, title: "Webinar TDD con CHAI", description: "Prueba con CHAI", date : "2017-04-15", organizer: savedOrganizerId});
       newEvent.save((err, event) => {
         const updatedEvent = {id: event._id, title: "Pair Programming con CHAI", description: "Prueba con CHAI", date : "2017-04-15"};
         chai.request(app)
           .put('/events/' + event._id)
-          .auth('test', 'testPassword')
+          .auth('organizerUser', 'test')
           .send(updatedEvent)
           .end((err,res) => {
             res.should.have.status(200);
@@ -154,13 +174,29 @@ describe('Delete events and users collections, insert test user', () => {
       });
     });
 
+    it('attendee shouldn\'t PUT an event', (done) => {
+      const newEvent = new eventModel({_id: 2, title: "Webinar TDD con CHAI", description: "Prueba con CHAI", date : "2017-04-15", organizer: savedOrganizerId});
+      newEvent.save((err, event) => {
+        const updatedEvent = {id: event._id, title: "Pair Programming con CHAI", description: "Prueba con CHAI", date : "2017-04-15"};
+        chai.request(app)
+          .put('/events/' + event._id)
+          .auth('attendeeUser', 'test')
+          .send(updatedEvent)
+          .end((err,res) => {
+            res.should.have.status(500);
+            res.text.should.have.string('Insufficient permissions');
+            done();
+          });
+      });
+    });
+
     it('it should PUT an existent event with optional properties', (done) => {
       const newEvent = new eventModel({_id: 2, title: "Webinar TDD con CHAI", description: "Prueba con CHAI", date : "2017-04-15", organizer: savedOrganizerId});
       newEvent.save((err,event) => {
         const updatedEvent = {id: event._id, title: "Webinar TDD con CHAI"};
         chai.request(app)
           .put('/events/' + event._id)
-          .auth('test', 'testPassword')
+          .auth('organizerUser', 'test')
           .send(updatedEvent)
           .end((err,res) => {
             res.should.have.status(200);
@@ -178,7 +214,7 @@ describe('Delete events and users collections, insert test user', () => {
       const updatedEvent = {id: 7, title: "Webinar TDD con CHAI", description: "Prueba con CHAI", date : "2017-04-15"};
       chai.request(app)
         .put('/events/' + 7)
-        .auth('test', 'testPassword')
+        .auth('organizerUser', 'test')
         .send(updatedEvent)
         .end((err, res) => {
           res.should.have.status(404);
@@ -188,13 +224,14 @@ describe('Delete events and users collections, insert test user', () => {
     });
   });
 
+
   describe('/DELETE event', () => {
-    it('it should DELETE an existent event', (done) => {
+    it('organizer should DELETE an existent event', (done) => {
       const newEvent = new eventModel({_id: 2, title: "Webinar TDD con CHAI", description: "Prueba con CHAI", date : "2017-04-15", organizer: savedOrganizerId});
       newEvent.save((err,event) => {
         chai.request(app)
         .delete('/events/' + event._id)
-        .auth('test', 'testPassword')
+        .auth('organizerUser', 'test')
         .end((err, res) => {
           res.should.have.status(200);
           res.body.should.be.a('string');
@@ -203,18 +240,38 @@ describe('Delete events and users collections, insert test user', () => {
       });
     });
 
+    
+
     it('it shouldn\'t DELETE a non existent event', (done) => {
       chai.request(app)
         .delete('/events/' + 9)
-        .auth('test', 'testPassword')
+        .auth('organizerUser', 'test')
         .end((err, res) => {
           res.should.have.status(404);
           res.body.should.be.eql({});
           done();
         });
     })
+
+    it('attendee shouldn\'t DELETE existent event', (done) => {
+      const newEvent = new eventModel({_id: 2, title: "Webinar TDD con CHAI", description: "Prueba con CHAI", date : "2017-04-15", organizer: savedOrganizerId});
+      newEvent.save((err,event) => {
+        chai.request(app)
+        .delete('/events/' + event._id)
+        .auth('attendeeUser', 'test')
+        .end((err, res) => {
+          res.should.have.status(500);
+          res.text.should.have.string('Insufficient permissions');
+          done();
+        });
+      });
+    });
+
   });
 
+
+
+    
   describe('/GET events by Title', () => {
     it('it should get all events containing a given title', (done) => {
       const newEvent1= new eventModel({_id: 1, title: "Feria de Libros", description: "Conferencias y venta", date : "2017-06-15", organizer: savedOrganizerId});
@@ -223,7 +280,7 @@ describe('Delete events and users collections, insert test user', () => {
           newEvent2.save((err,newEvent2) => {
           chai.request(app)
           .get('/events/title/' + "feria")
-          .auth('test', 'testPassword')
+          .auth('attendeeUser', 'test')
           .end((err, res) => {
             res.should.have.status(200);
             res.body.should.be.a('array');
@@ -234,6 +291,8 @@ describe('Delete events and users collections, insert test user', () => {
       });
     });
   });
+
+
 });
 
 

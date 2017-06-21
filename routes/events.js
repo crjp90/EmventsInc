@@ -72,7 +72,7 @@ router.get('/:id', /*[authenticated, acl.middleware( 2, get_user_id) ,*/ (req, r
   )
 });
 
-router.get('/title/:title', /*[authenticated, acl.middleware( 1, get_user_id) ],*/ (req,res) => {
+router.get('/title/:title', [authenticated, acl.middleware( 3, get_user_id) ], (req,res) => {
   const titleBuscado = req.params.title;
   eventManager.getEventsByTitle(titleBuscado)
   .then(
@@ -132,7 +132,7 @@ router.post('/:eventid/signup', /*[authenticated, acl.middleware( 3, get_user_id
   )
 });
 
-router.post('/', /*[authenticated, acl.middleware( 1, get_user_id) ],*/ (req,res) => {
+router.post('/', [authenticated, acl.middleware( 1, get_user_id) ], (req,res, next) => {
   eventManager.createEvent(req.body.id, req.body.title, req.body.description, req.body.date, req.user._id)
   .then(
     event => {
@@ -147,6 +147,11 @@ router.post('/', /*[authenticated, acl.middleware( 1, get_user_id) ],*/ (req,res
   )
 });
 
+// function next() {
+//   console.log('entro a next');
+//   res.send(401).json('Unauthorized');
+// }
+  
 router.put('/:id', [authenticated, acl.middleware( 2, get_user_id) ], (req,res) => {
   eventManager.updateEvent(req.params.id, req.body.title, req.body.description, req.body.date, req.user._id)
   .then(
