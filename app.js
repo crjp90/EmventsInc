@@ -13,8 +13,8 @@ app.use('/events', events);
 app.use('/users', users);
 app.use('/roles', roles);
 
-app.listen(3000, () => {
-  console.log('Example app listening on port 3000!')
+app.listen(5000, () => {
+  console.log('Example app listening on port 5000!')
 })
 
 module.exports = app;

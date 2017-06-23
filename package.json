@@ -6,6 +6,9 @@
   "scripts": {
     "test": "mocha"
   },
+  "engines": {
+    "node": "6.10.3"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/ccalvarez/EmventsInc.git"
