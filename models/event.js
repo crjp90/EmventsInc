@@ -24,23 +24,9 @@ const eventSchema = new Schema(
     title: { type: String, required: true, index: true},
     description: { type: String, required: true },
     date: { type: Date }
-  },
-  {
-    versionKey: false
   }
 );
 
 Event = mongoose.model('Event', eventSchema);
-
-Event.ensureIndexes((err) => {
-  if (err) {
-    console.log(err);
-  }
-  else
-  {
-    console.log('Ensure Indexes executed');
-  }
-});
-
 
 module.exports = Event;

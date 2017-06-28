@@ -1,15 +1,35 @@
 const express = require('express');
+const passport = require('passport')
+const BasicStrategy = require('passport-http').BasicStrategy;
 const router = express.Router();
 const eventManager = require('./eventsManager');
+const User = require('../models/user.js');
+
+passport.use(new BasicStrategy(
+  (username, password, done) => {
+    User.findOne({ username: username }, (err, user) => {
+      if (err) {
+        return done(err); }
+      if (!user) {
+        return done(null, false); }
+      if (!user.verifyPassword(password)) {
+        return done(null, false);
+      }
+      return done(null, user);
+    });
+  }
+));
+
+router.all('*', passport.authenticate('basic', {session: false}));
 
 router.get('/', (req, res) => {
-  eventManager.getAll()
-  .then(
-    events => res.json(events)
-  ).catch(
-    error => res.status(500).send('Se encontro un error ' + error)
-  )
-})
+    eventManager.getAll()
+    .then(
+      events => res.json(events)
+    ).catch(
+      error => res.status(500).send('Se encontro un error ' + error)
+    )
+});
 
 router.get('/:id', (req, res) => {
   const idBuscado = req.params.id;
@@ -26,7 +46,7 @@ router.get('/:id', (req, res) => {
   ).catch(
     error => res.status(500).send('Se encontró un error ' + error)
   )
-})
+});
 
 router.get('/title/:title', (req,res) => {
   const titleBuscado = req.params.title;
@@ -51,7 +71,7 @@ router.post('/', (req,res) => {
   ).catch(
     error => res.status(500).send('Se encontró un error ' + error)
   )
-})
+});
 
 router.put('/:id', (req,res) => {
   eventManager.updateEvent(req.params.id, req.body.title, req.body.description, req.body.date)
@@ -67,7 +87,7 @@ router.put('/:id', (req,res) => {
   .catch(
     error => res.status(500).send('Se encontró un error ' + error)
   )
-})
+});
 
 router.delete('/:id', (req, res) => {
   eventManager.deleteEvent(req.params.id)
@@ -84,6 +104,6 @@ router.delete('/:id', (req, res) => {
   .catch(
     error => res.status(500).send('Se encontró un error ' + error)
   )
-})
+});
 
 module.exports = router;
