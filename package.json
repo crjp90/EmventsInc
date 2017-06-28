@@ -2,9 +2,12 @@
   "name": "EmventsInc",
   "version": "1.0.0",
   "description": "Emvents Inc. REST API",
-  "main": "helloWorld.js",
+  "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha"
+  },
+  "engines": {
+    "node": "6.10.3"
   },
   "repository": {
     "type": "git",
@@ -17,7 +20,17 @@
   },
   "homepage": "https://github.com/ccalvarez/EmventsInc",
   "dependencies": {
+    "acl": "^0.4.10",
     "body-parser": "^1.17.1",
-    "express": "4.15.2"
+    "express": "4.15.2",
+    "mongodb": "2.2.25",
+    "mongoose": "4.9.5",
+    "passport": "^0.3.2",
+    "passport-http": "^0.3.0"
+  },
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "chai-http": "^3.0.0",
+    "mocha": "^3.2.0"
   }
 }
