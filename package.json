@@ -2,7 +2,7 @@
   "name": "EmventsInc",
   "version": "1.0.0",
   "description": "Emvents Inc. REST API",
-  "main": "helloWorld.js",
+  "main": "app.js",
   "scripts": {
     "test": "mocha"
   },
@@ -18,7 +18,9 @@
   "homepage": "https://github.com/ccalvarez/EmventsInc",
   "dependencies": {
     "body-parser": "^1.17.1",
-    "express": "4.15.2"
+    "express": "4.15.2",
+    "mongodb": "2.2.25",
+    "mongoose": "4.9.5"
   },
   "devDependencies": {
     "chai": "^3.5.0",
