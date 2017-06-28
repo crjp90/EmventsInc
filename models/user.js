@@ -1,7 +1,7 @@
-let User = null;
+let Usuario = null;
 const mongoose = require('mongoose');
 
-const userSchema = mongoose.Schema(
+const usuarioSchema = mongoose.Schema(
   {
     username: { type: String, required: true, unique: true, index: true},
     password: { type: String, required: true},
@@ -10,12 +10,12 @@ const userSchema = mongoose.Schema(
   }
 );
 
-userSchema.methods.verifyPassword = function(password) {
+usuarioSchema.methods.verifyPassword = function(password) {
   // no utilizamos Arrow Function ya que interfiere con el contexto de this:	
   return this.password === password;
 }
 
-User = mongoose.model('User', userSchema);
+Usuario = mongoose.model('Usuario', usuarioSchema);
 
-module.exports = User;
+module.exports = Usuario;
 

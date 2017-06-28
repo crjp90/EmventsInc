@@ -6,6 +6,9 @@
   "scripts": {
     "test": "mocha"
   },
+  "engines": {
+    "node": "6.10.3"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/ccalvarez/EmventsInc.git"
@@ -17,6 +20,7 @@
   },
   "homepage": "https://github.com/ccalvarez/EmventsInc",
   "dependencies": {
+    "acl": "^0.4.10",
     "body-parser": "^1.17.1",
     "express": "4.15.2",
     "mongodb": "2.2.25",
