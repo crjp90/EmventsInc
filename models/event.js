@@ -3,7 +3,8 @@ let acl = null;
 const mongoose = require('mongoose');
 const moduloacl = require('acl');
 
-const connString = 'mongodb://localhost:27017/events';
+//const connString = 'mongodb://localhost:27017/events';
+const connString = process.env.MONGOLAB_URI;
 mongoose.connect(connString);
 
 function logger()
